@@ -19,6 +19,7 @@ class NylasComponentKit
       enumerable: true
 
   @load "Menu", 'menu'
+  @load "Calendar", 'calendar'
   @load "DropZone", 'drop-zone'
   @load "Spinner", 'spinner'
   @load "Switch", 'switch'

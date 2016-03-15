@@ -21,7 +21,8 @@
   },
   "windowTypes": {
     "default": true,
-    "composer": true
+    "composer": true,
+    "calendar": true
   },
   "license": "GPL-3.0"
 }
