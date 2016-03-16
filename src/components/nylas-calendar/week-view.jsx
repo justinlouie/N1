@@ -2,6 +2,7 @@ import _ from 'underscore'
 import Rx from 'rx-lite'
 import React from 'react'
 import moment from 'moment'
+import classnames from 'classnames'
 import {RetinaImg} from 'nylas-component-kit'
 import {Event, Matcher, DatabaseStore} from 'nylas-exports'
 
@@ -69,12 +70,21 @@ export default class WeekView extends React.Component {
   }
 
   _renderDateLabel = (day) => {
+    const className = classnames({
+      "day-label-wrap": true,
+      "is-today": this._isToday(day),
+    })
     return (
-      <div className="day-label-wrap">
+      <div className={className}>
         <span className="date-label">{day.format("D")}</span>
         <span className="weekday-label">{day.format("ddd")}</span>
       </div>
     )
+  }
+
+  _isToday(day) {
+    const now = moment();
+    return (now.dayOfYear() === day.dayOfYear() && now.year() === day.year())
   }
 
   _renderEventColumn = (day) => {
@@ -192,6 +202,12 @@ export default class WeekView extends React.Component {
     this.props.changeCurrentMoment(newMoment)
   }
 
+  _gridHeight() {
+    const INTERVAL_HEIGHT = 20;
+    const INTERVAL_TIME = moment.duration(30, 'minutes');
+    return moment.duration(1, 'day').as('seconds') / INTERVAL_TIME.as('seconds') * INTERVAL_HEIGHT
+  }
+
   render() {
     return (
       <div className="calendar-view week-view">
@@ -207,7 +223,7 @@ export default class WeekView extends React.Component {
           {this._days().map(this._renderDateLabel)}
         </div>
 
-        <div className="event-grid">
+        <div className="event-grid" style={{height: this._gridHeight()}}>
           {this._days().map(this._renderEventColumn)}
         </div>
 

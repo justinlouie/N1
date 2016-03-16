@@ -8,11 +8,33 @@ export default class HeaderControls extends React.Component {
     title: React.PropTypes.string,
     leftHeaderControls: React.PropTypes.node,
     rightHeaderControls: React.PropTypes.node,
+    nextAction: React.PropTypes.func,
+    prevAction: React.PropTypes.func,
   }
 
   static defaultProps = {
     leftHeaderControls: false,
     rightHeaderControls: false,
+  }
+
+  _renderNextAction() {
+    if (!this.props.nextAction) { return false; }
+    return (
+      <button className="btn btn-icon next" onClick={this.props.nextAction}>
+        <RetinaImg name="ic-calendar-right-arrow.png"
+                   mode={RetinaImg.Mode.ContentIsMask}/>
+      </button>
+    )
+  }
+
+  _renderPrevAction() {
+    if (!this.props.prevAction) { return false; }
+    return (
+      <button className="btn btn-icon prev" onClick={this.props.prevAction}>
+        <RetinaImg name="ic-calendar-left-arrow.png"
+                   mode={RetinaImg.Mode.ContentIsMask}/>
+      </button>
+    )
   }
 
   render() {
@@ -23,17 +45,9 @@ export default class HeaderControls extends React.Component {
         </div>
 
         <div className="center-controls">
-          <button className="btn btn-icon prev">
-            <RetinaImg name="ic-calendar-left-arrow.png"
-                       mode={RetinaImg.Mode.ContentIsMask}/>
-          </button>
-
+          {this._renderPrevAction()}
           <span className="title">{this.props.title}</span>
-
-          <button className="btn btn-icon next">
-            <RetinaImg name="ic-calendar-right-arrow.png"
-                       mode={RetinaImg.Mode.ContentIsMask}/>
-          </button>
+          {this._renderNextAction()}
         </div>
 
         <div className="right-controls">
