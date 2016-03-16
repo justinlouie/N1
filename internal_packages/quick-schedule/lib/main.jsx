@@ -2,7 +2,7 @@
 
 import CalendarButton from './calendar-button'
 import {ComponentRegistry, WorkspaceStore} from 'nylas-exports'
-import {Calendar} from 'nylas-component-kit'
+import {NylasCalendar} from 'nylas-component-kit'
 
 export function activate() {
   if (NylasEnv.getWindowType() === 'calendar') {
@@ -10,10 +10,9 @@ export function activate() {
     WorkspaceStore.defineSheet('Main', {root: true},
       {popout: ['Center']})
 
-    ComponentRegistry.register(Calendar,
+    ComponentRegistry.register(NylasCalendar,
       {location: WorkspaceStore.Location.Center})
-  }
-  else {
+  } else {
     ComponentRegistry.register(CalendarButton,
         {role: 'Composer:ActionButton'});
   }
@@ -25,8 +24,7 @@ export function serialize() {
 export function deactivate() {
   if (NylasEnv.getWindowType() === 'calendar') {
     console.log("it works!");
-  }
-  else {
+  } else {
     ComponentRegistry.unregister(CalendarButton);
   }
 }

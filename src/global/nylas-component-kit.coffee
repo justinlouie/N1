@@ -19,7 +19,6 @@ class NylasComponentKit
       enumerable: true
 
   @load "Menu", 'menu'
-  @load "Calendar", 'calendar'
   @load "DropZone", 'drop-zone'
   @load "Spinner", 'spinner'
   @load "Switch", 'switch'
@@ -34,6 +33,7 @@ class NylasComponentKit
   @load "EmptyListState", 'empty-list-state'
   @load "ListTabular", 'list-tabular'
   @load "DraggableImg", 'draggable-img'
+  @load "NylasCalendar", 'nylas-calendar/nylas-calendar'
   @load "EventedIFrame", 'evented-iframe'
   @load "ButtonDropdown", 'button-dropdown'
   @load "Contenteditable", 'contenteditable/contenteditable'

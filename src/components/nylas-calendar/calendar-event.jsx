@@ -25,10 +25,10 @@ export default class CalendarEvent extends React.Component {
     const width = (1 / this.props.concurrentEvents);
     const left = width * this.props.order;
     return {
-      top: `${top}%`,
-      left: `${left}%`,
-      width: `${width}%`,
-      height: `${height}%`,
+      top: `${top * 100}%`,
+      left: `${left * 100}%`,
+      width: `${width * 100}%`,
+      height: `${height * 100}%`,
     }
   }
 

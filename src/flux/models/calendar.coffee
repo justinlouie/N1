@@ -22,7 +22,14 @@ class Calendar extends Model
   @attributes: _.extend {}, Model.attributes,
     'name': Attributes.String
       modelKey: 'name'
+      jsonKey: 'name'
+
     'description': Attributes.String
       modelKey: 'description'
+      jsonKey: 'description'
+
+    'readOnly': Attributes.Boolean
+      modelKey: 'readOnly'
+      jsonKey: 'read_only'
 
 module.exports = Calendar

@@ -17,8 +17,12 @@
   }
 
   .week-view {
+    .date-labels {
+      display: flex;
+    }
     .day-label-wrap {
       text-align: center;
+      flex: 1;
       &.is-today {
         .date-label { color: @accent-primary; }
         .weekday-label { color: @accent-primary; }
@@ -38,9 +42,11 @@
       color: #ccd4d8;
     }
 
+    .event-grid-wrap {
+      overflow: auto;
+    }
     .event-grid {
       display: flex;
-      overflow: auto;
     }
 
     .event-column {

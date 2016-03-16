@@ -36,7 +36,7 @@ export default class WeekView extends React.Component {
   }
 
   componentWillMount() {
-    this._sub = this._calEventSubscription()
+    this._sub = this._calEventSubscription(this.props)
   }
 
   componentWillReceiveProps(props) {
@@ -48,7 +48,7 @@ export default class WeekView extends React.Component {
     this._sub.dispose();
   }
 
-  _calEventSubscription(props = this.props) {
+  _calEventSubscription(props) {
     return Rx.Observable.fromQuery(
       DatabaseStore.findAll(Event).where(Matcher.Not(Matcher.Or([
         Event.attributes.end.lessThan(this._startMoment(props).unix()),
@@ -62,10 +62,10 @@ export default class WeekView extends React.Component {
 
   _endMoment(props) {
     const weekOfYear = props.currentMoment.week()
-    return this._startMoment(weekOfYear).week(weekOfYear + 1).subtract(1, 'millisecond')
+    return this._startMoment(props).week(weekOfYear + 1).subtract(1, 'millisecond')
   }
 
-  _onEventsChange(events = []) {
+  _onEventsChange = (events = []) => {
     this.setState({events})
   }
 
@@ -89,7 +89,7 @@ export default class WeekView extends React.Component {
 
   _renderEventColumn = (day) => {
     const events = this._eventsForDay(day);
-    const eventOverlap = this._eventOverlap(events)
+    const eventOverlap = this._eventOverlap(events);
     const eventComponents = events.map((e) => {
       return (
         <CalendarEvent event={e} order={eventOverlap[e.id].order}
@@ -127,13 +127,13 @@ export default class WeekView extends React.Component {
       times[event.start].push(event)
       times[event.end].push(event)
     }
-    const sortedTimes = Object.keys(times).sort();
+    const sortedTimes = Object.keys(times).map((k) => parseInt(k, 10)).sort();
     const overlapById = {}
     let startedEvents = []
     for (const t of sortedTimes) {
       for (const e of times[t]) {
         if (e.start === t) {
-          overlapById[e.id] = {}
+          overlapById[e.id] = {concurrentEvents: 1, order: 1}
           startedEvents.push(e)
         }
         if (e.end === t) {
@@ -174,7 +174,7 @@ export default class WeekView extends React.Component {
   _leftHeaderControls() {
     return (
       <button className="btn" onClick={this._onClickToday}>
-        <button className="btn">Today</button>
+        Today
       </button>
     );
   }
@@ -223,8 +223,10 @@ export default class WeekView extends React.Component {
           {this._days().map(this._renderDateLabel)}
         </div>
 
-        <div className="event-grid" style={{height: this._gridHeight()}}>
-          {this._days().map(this._renderEventColumn)}
+        <div className="event-grid-wrap">
+          <div className="event-grid" style={{height: this._gridHeight()}}>
+            {this._days().map(this._renderEventColumn)}
+          </div>
         </div>
 
         <FooterControls />
