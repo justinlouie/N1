@@ -55,6 +55,7 @@ class NylasExports
   @load "EdgehillAPI", 'flux/edgehill-api'
 
   # The Database
+  @load "Matcher", 'flux/attributes/matcher'
   @load "DatabaseStore", 'flux/stores/database-store'
   @load "DatabaseTransaction", 'flux/stores/database-transaction'
   @load "QueryResultSet", 'flux/models/query-result-set'
