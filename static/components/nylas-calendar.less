@@ -1,9 +1,11 @@
 @import 'ui-variables';
 
 .nylas-calendar {
+  height: 100%;
+
   background: @background-off-primary;
   .calendar-view {
-
+    height: 100%;
   }
 
   .calendar-event {
@@ -17,6 +19,10 @@
   }
 
   .week-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
     .date-labels {
       display: flex;
     }
@@ -43,6 +49,7 @@
     }
 
     .event-grid-wrap {
+      flex: 1;
       overflow: auto;
     }
     .event-grid {

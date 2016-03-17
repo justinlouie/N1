@@ -33,6 +33,10 @@ export default class NylasCalendar extends React.Component {
     this.setState({currentMoment: newMoment})
   }
 
+  static containerStyles = {
+    height: "100%",
+  }
+
   render() {
     return (
       <div className="nylas-calendar">
@@ -43,6 +47,5 @@ export default class NylasCalendar extends React.Component {
       </div>
     )
   }
-
 }
 
