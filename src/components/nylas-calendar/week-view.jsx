@@ -27,11 +27,15 @@ export default class WeekView extends React.Component {
 
   constructor(props) {
     super(props);
+    this.MIN_INTERVAL_HEIGHT = 20;
+    this.INTERVAL_TIME = moment.duration(30, 'minutes');
+    this.DAY_DUR = moment.duration(1, 'day')
     this.state = {
       events: [],
       // weekOfYear starts at 1 and is locale dependent. See
       // http://momentjs.com/docs/#/get-set/week/
       weekOfYear: React.PropTypes.instanceOf(moment).isRequired,
+      intervalHeight: this.MIN_INTERVAL_HEIGHT,
     }
   }
 
@@ -39,13 +43,25 @@ export default class WeekView extends React.Component {
     this._sub = this._calEventSubscription(this.props)
   }
 
+  componentDidMount() {
+    this._renderEventGridBg()
+    this._centerScrollRegion()
+    this._setIntervalHeight()
+    window.addEventListener('resize', this._setIntervalHeight, true)
+  }
+
   componentWillReceiveProps(props) {
     if (this._sub) { this._sub.dispose() }
     this._sub = this._calEventSubscription(props)
   }
 
+  componentDidUpdate() {
+    this._renderEventGridBg()
+  }
+
   componentWillUnmount() {
     this._sub.dispose();
+    window.removeEventListener('resize', this._setIntervalHeight)
   }
 
   _calEventSubscription(props) {
@@ -203,9 +219,85 @@ export default class WeekView extends React.Component {
   }
 
   _gridHeight() {
-    const INTERVAL_HEIGHT = 20;
-    const INTERVAL_TIME = moment.duration(30, 'minutes');
-    return moment.duration(1, 'day').as('seconds') / INTERVAL_TIME.as('seconds') * INTERVAL_HEIGHT
+    return this.DAY_DUR.as('seconds') / this.INTERVAL_TIME.as('seconds') * this.state.intervalHeight
+  }
+
+  _renderEventGridBg() {
+    const canvas = React.findDOMNode(this.refs.eventGridBg);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const height = this._gridHeight();
+    canvas.height = height;
+
+    const doStroke = (type, strokeStyle) => {
+      ctx.strokeStyle = strokeStyle;
+      ctx.beginPath();
+      for (const {yPos} of this._tickGenerator({type: type})) {
+        ctx.moveTo(0, yPos);
+        ctx.lineTo(canvas.width, yPos);
+      }
+      ctx.stroke();
+    }
+
+    doStroke("minor", "#f1f1f1"); // Minor Ticks
+    doStroke("major", "#e0e0e0"); // Major ticks
+  }
+
+  _centerScrollRegion() {
+    const wrap = React.findDOMNode(this.refs.eventGridWrap);
+    wrap.scrollTop = (this._gridHeight() / 2) - (wrap.getBoundingClientRect().height / 2);
+  }
+
+  *_tickGenerator({type}) {
+    const height = this._gridHeight();
+    const dayInSec = this.DAY_DUR.as('seconds');
+    const intervalSec = this.INTERVAL_TIME.as('seconds');
+
+    let step = intervalSec;
+    let stepStart = 0;
+
+    // We only use a moment object so we can properly localize the "time"
+    // part. The day is irrelevant. We just need to make sure we're
+    // picking a non-DST boundary day.
+    const start = moment([2015, 1, 1]);
+
+    const duration = moment.duration(this.INTERVAL_TIME)
+    if (type === "major") {
+      step = intervalSec * 2;
+      duration.add(this.INTERVAL_TIME) // edit in place
+    } else if (type === "minor") {
+      step = intervalSec * 2;
+      stepStart = intervalSec;
+      duration.add(this.INTERVAL_TIME) // edit in place
+      start.add(this.INTERVAL_TIME);
+    }
+
+    const curTime = moment(start)
+    for (let tsec = stepStart; tsec <= dayInSec; tsec += step) {
+      const y = (tsec / dayInSec) * height;
+      yield {time: curTime, yPos: y}
+      curTime.add(duration)
+    }
+  }
+
+  _setIntervalHeight = () => {
+    const wrap = React.findDOMNode(this.refs.eventGridWrap);
+    const numIntervals = Math.floor(this.DAY_DUR.as('seconds') / this.INTERVAL_TIME.as('seconds'));
+    this.setState({
+      intervalHeight: Math.max(wrap.getBoundingClientRect().height / numIntervals, this.MIN_INTERVAL_HEIGHT),
+    });
+  }
+
+  _renderEventGridLabels() {
+    const labels = []
+    let centering = 0;
+    for (const {time, yPos} of this._tickGenerator({type: "major"})) {
+      const hr = time.format("LT"); // Locale time. 2:00 pm or 14:00
+      const style = {top: yPos - centering}
+      labels.push(<span className="legend-text" style={style}>{hr}</span>)
+      centering = 8; // center all except the 1st one.
+    }
+    return labels.slice(0, labels.length - 1);
   }
 
   render() {
@@ -220,12 +312,15 @@ export default class WeekView extends React.Component {
           prevAction={this._onClickPrevWeek} />
 
         <div className="date-labels">
+          <div className="date-label-legend"><span className="legend-text">All Day</span></div>
           {this._days().map(this._renderDateLabel)}
         </div>
 
-        <div className="event-grid-wrap">
+        <div className="event-grid-wrap" ref="eventGridWrap">
           <div className="event-grid" style={{height: this._gridHeight()}}>
+            <div className="event-grid-legend">{this._renderEventGridLabels()}</div>
             {this._days().map(this._renderEventColumn)}
+            <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
           </div>
         </div>
 
