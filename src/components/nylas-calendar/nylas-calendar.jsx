@@ -20,7 +20,7 @@ export default class NylasCalendar extends React.Component {
     super(props);
     this.state = {
       currentView: WeekView,
-      currentMoment: moment(),
+      selectedMoment: moment(),
     };
   }
 
@@ -29,8 +29,8 @@ export default class NylasCalendar extends React.Component {
     this.setState({currentView: lookup[currentView]});
   }
 
-  _changeCurrentMoment = (newMoment) =>{
-    this.setState({currentMoment: newMoment})
+  _changeSelectedMoment = (newMoment) =>{
+    this.setState({selectedMoment: newMoment})
   }
 
   static containerStyles = {
@@ -41,9 +41,9 @@ export default class NylasCalendar extends React.Component {
     return (
       <div className="nylas-calendar">
         <this.state.currentView
-          currentMoment={this.state.currentMoment}
+          selectedMoment={this.state.selectedMoment}
           changeCurrentView={this._changeCurrentView}
-          changeCurrentMoment={this._changeCurrentMoment}/>
+          changeSelectedMoment={this._changeSelectedMoment}/>
       </div>
     )
   }

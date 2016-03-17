@@ -1,6 +1,6 @@
 import React from 'react'
 import moment from 'moment'
-import {Event} from 'nylas-exports'
+import {Event, Utils} from 'nylas-exports'
 
 export default class CalendarEvent extends React.Component {
   static displayName = "CalendarEvent";
@@ -23,12 +23,15 @@ export default class CalendarEvent extends React.Component {
     const top = Math.max((this.props.event.start - this.props.dayStart) / dayLen, 0);
     const height = Math.min(duration / dayLen, 1);
     const width = (1 / this.props.concurrentEvents);
-    const left = width * this.props.order;
+    const left = width * (this.props.order - 1);
+    const hue = Utils.hueForString(this.props.event.calendarId);
+    const bgColor = `hsla(${hue}, 50%, 45%, 0.35)`
     return {
       top: `${top * 100}%`,
       left: `${left * 100}%`,
       width: `${width * 100}%`,
       height: `${height * 100}%`,
+      backgroundColor: bgColor,
     }
   }
 

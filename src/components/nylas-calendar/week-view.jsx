@@ -15,14 +15,14 @@ export default class WeekView extends React.Component {
   static displayName = "WeekView";
 
   static propTypes = {
-    currentMoment: React.PropTypes.instanceOf(moment).isRequired,
+    selectedMoment: React.PropTypes.instanceOf(moment).isRequired,
     changeCurrentView: React.PropTypes.func,
-    changeCurrentMoment: React.PropTypes.func,
+    changeSelectedMoment: React.PropTypes.func,
   }
 
   static defaultProps = {
     changeCurrentView: () => {},
-    changeCurrentMoment: () => {},
+    changeSelectedMoment: () => {},
   }
 
   constructor(props) {
@@ -32,9 +32,6 @@ export default class WeekView extends React.Component {
     this.DAY_DUR = moment.duration(1, 'day')
     this.state = {
       events: [],
-      // weekOfYear starts at 1 and is locale dependent. See
-      // http://momentjs.com/docs/#/get-set/week/
-      weekOfYear: React.PropTypes.instanceOf(moment).isRequired,
       intervalHeight: this.MIN_INTERVAL_HEIGHT,
     }
   }
@@ -73,12 +70,12 @@ export default class WeekView extends React.Component {
   }
 
   _startMoment(props) {
-    return moment([moment().year()]).weekday(0).week(props.currentMoment.week())
+    // NOTE: weekday is Locale aware
+    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week())
   }
 
   _endMoment(props) {
-    const weekOfYear = props.currentMoment.week()
-    return this._startMoment(props).week(weekOfYear + 1).subtract(1, 'millisecond')
+    return this._startMoment(props).add(1, 'week').subtract(1, 'millisecond')
   }
 
   _onEventsChange = (events = []) => {
@@ -113,7 +110,11 @@ export default class WeekView extends React.Component {
           concurrentEvents={eventOverlap[e.id].concurrentEvents}/>
       );
     });
-    return <div className="event-column">{eventComponents}</div>
+    const className = classnames({
+      "event-column": true,
+      "weekend": day.day() === 0 || day.day() === 6,
+    });
+    return <div className={className}>{eventComponents}</div>
   }
 
   _eventsForDay(day) {
@@ -205,17 +206,17 @@ export default class WeekView extends React.Component {
   }
 
   _onClickToday = () => {
-    this.props.changeCurrentMoment(moment())
+    this.props.changeSelectedMoment(moment())
   }
 
   _onClickNextWeek = () => {
-    const newMoment = this._startMoment(this.props).add(1, 'week')
-    this.props.changeCurrentMoment(newMoment)
+    const newMoment = moment(this.props.selectedMoment).add(1, 'week')
+    this.props.changeSelectedMoment(newMoment)
   }
 
   _onClickPrevWeek = () => {
-    const newMoment = this._startMoment(this.props).subtract(1, 'week')
-    this.props.changeCurrentMoment(newMoment)
+    const newMoment = moment(this.props.selectedMoment).subtract(1, 'week')
+    this.props.changeSelectedMoment(newMoment)
   }
 
   _gridHeight() {
