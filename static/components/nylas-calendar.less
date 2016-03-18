@@ -1,6 +1,7 @@
 @import 'ui-variables';
 
 .nylas-calendar {
+
   height: 100%;
 
   background: @background-off-primary;
@@ -47,6 +48,9 @@
     @legend-width: 75px;
 
     .calendar-area-wrap {
+      &::-webkit-scrollbar {
+        display: none;
+      }
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -86,6 +90,7 @@
       width: auto;
       z-index: 2;
       overflow: hidden;
+      transition: height ease-in-out 200ms;
     }
 
     .all-day-legend {

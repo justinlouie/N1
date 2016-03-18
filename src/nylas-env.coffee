@@ -344,8 +344,11 @@ class NylasEnvConstructor extends Model
   # content trace visualizer (chrome://tracing). It's like Chromium Developer
   # Tools Profiler, but for all processes and threads.
   trace: ->
-    tracing = remote.require('content-tracing')
-    tracing.startRecording '*', 'record-until-full,enable-sampling,enable-systrace', ->
+    tracing = remote.require('electron').contentTracing
+    opts =
+      categoryFilter: '*',
+      traceOptions: 'record-until-full,enable-sampling,enable-systrace',
+    tracing.startRecording opts, ->
       console.log('Tracing started')
       setTimeout ->
         tracing.stopRecording '', (path) ->

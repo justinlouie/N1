@@ -11,6 +11,8 @@ import CalendarEvent from './calendar-event'
 import HeaderControls from './header-controls'
 import FooterControls from './footer-controls'
 
+const overlapsBounds = Utils.overlapsBounds;
+
 export default class WeekView extends React.Component {
   static displayName = "WeekView";
 
@@ -45,6 +47,9 @@ export default class WeekView extends React.Component {
     this._renderEventGridBg()
     this._centerScrollRegion()
     this._setIntervalHeight()
+    const weekStart = this._startMoment(this.props).add(1, 'week').unix()
+    this._scrollTime = weekStart
+    this._ensureHorizontalScrollPos()
     window.addEventListener('resize', this._setIntervalHeight, true)
   }
 
@@ -55,6 +60,7 @@ export default class WeekView extends React.Component {
 
   componentDidUpdate() {
     this._renderEventGridBg()
+    this._ensureHorizontalScrollPos()
   }
 
   componentWillUnmount() {
@@ -163,7 +169,7 @@ export default class WeekView extends React.Component {
       end: this._dayEnd(day),
     }
     return _.filter(this.state.events, (event) => {
-      return Utils.overlapsBounds(bounds, event) && !event.isAllDay()
+      return overlapsBounds(bounds, event) && !event.isAllDay()
     });
   }
 
@@ -173,7 +179,7 @@ export default class WeekView extends React.Component {
       end: this._endMoment(this.props).unix(),
     }
     return _.filter(this.state.events, (event) => {
-      return Utils.overlapsBounds(bounds, event) && event.isAllDay()
+      return overlapsBounds(bounds, event) && event.isAllDay()
     });
   }
 
@@ -260,8 +266,8 @@ export default class WeekView extends React.Component {
   }
 
   _currentWeekText() {
-    const start = this._startMoment(this.props);
-    const end = this._endMoment(this.props);
+    const start = this._startMoment(this.props).add(1, 'week');
+    const end = this._endMoment(this.props).subtract(1, 'week');
     return `${start.format("MMMM D")} - ${end.format("MMMM D YYYY")}`
   }
 
@@ -403,6 +409,29 @@ export default class WeekView extends React.Component {
     React.findDOMNode(this.refs.eventGridLegendWrap).scrollTop = event.target.scrollTop
   }
 
+  _onScrollCalWrap = (event) => {
+    if (!event.target.scrollLeft) { return }
+    const percent = event.target.scrollLeft / event.target.scrollWidth
+    const weekStart = this._startMoment(this.props).unix()
+    const weekEnd = this._endMoment(this.props).unix()
+    this._scrollTime = weekStart + ((weekEnd - weekStart) * percent)
+    if (percent < 0.25) {
+      this._onClickPrevWeek()
+    } else if (percent + 0.33 > 0.95) {
+      this._onClickNextWeek()
+    }
+  }
+
+  _ensureHorizontalScrollPos() {
+    if (!this._scrollTime) return;
+    const weekStart = this._startMoment(this.props).unix()
+    const weekEnd = this._endMoment(this.props).unix()
+    let percent = (this._scrollTime - weekStart) / (weekEnd - weekStart)
+    percent = Math.min(Math.max(percent, 0), 1)
+    const wrap = React.findDOMNode(this.refs.calendarAreaWrap)
+    wrap.scrollLeft = wrap.scrollWidth * percent
+  }
+
   _renderEventGridLabels() {
     const labels = []
     let centering = 0;
@@ -437,7 +466,8 @@ export default class WeekView extends React.Component {
           </div>
         </div>
 
-        <div className="calendar-area-wrap">
+        <div className="calendar-area-wrap" ref="calendarAreaWrap"
+             onScroll={this._onScrollCalWrap}>
           <div className="week-header">
             <div className="date-labels">
               {this._days().map(this._renderDateLabel)}
