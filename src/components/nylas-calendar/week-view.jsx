@@ -117,7 +117,8 @@ export default class WeekView extends React.Component {
     const eventComponents = events.map((e) => {
       return (
         <CalendarEvent event={e} order={eventOverlap[e.id].order}
-          dayStart={day.unix()}
+          scopeEnd={this._dayEnd(day)}
+          scopeStart={day.unix()}
           concurrentEvents={eventOverlap[e.id].concurrentEvents}/>
       );
     });
@@ -126,6 +127,24 @@ export default class WeekView extends React.Component {
       "weekend": day.day() === 0 || day.day() === 6,
     });
     return <div className={className}>{eventComponents}</div>
+  }
+
+  _renderAllDayEvents() {
+    const DAY_HEIGHT = 20
+    const allDayEvents = this._allDayEvents()
+    const eventOverlap = this._eventOverlap(allDayEvents);
+    const eventComponents = allDayEvents.map((e) => {
+      return (
+        <CalendarEvent event={e} order={eventOverlap[e.id].order}
+          scopeStart={this._startMoment(this.props).unix()}
+          scopeEnd={this._endMoment(this.props).unix()}
+          direction="horizontal"
+          fixedMinorDimension={DAY_HEIGHT}
+          concurrentEvents={eventOverlap[e.id].concurrentEvents}/>
+      );
+    });
+    const height = this._maxConcurrentEvents(eventOverlap) * DAY_HEIGHT
+    return <div className="all-day-events" style={{height}}>{eventComponents}</div>
   }
 
   _eventsForDay(day) {
@@ -191,6 +210,14 @@ export default class WeekView extends React.Component {
       }
     }
     return overlapById
+  }
+
+  _maxConcurrentEvents(eventOverlap) {
+    let maxConcurrent = -1;
+    _.each(eventOverlap, ({concurrentEvents}) => {
+      maxConcurrent = Math.max(concurrentEvents, maxConcurrent)
+    })
+    return maxConcurrent
   }
 
   _days() {
@@ -324,12 +351,6 @@ export default class WeekView extends React.Component {
     return labels.slice(0, labels.length - 1);
   }
 
-  _renderAllDayEvent(event) {
-    return (
-      <div className="all-day-event">{event.title}</div>
-    )
-  }
-
   render() {
     return (
       <div className="calendar-view week-view">
@@ -347,9 +368,7 @@ export default class WeekView extends React.Component {
             {this._days().map(this._renderDateLabel)}
           </div>
 
-          <div className="all-day-events">
-            {this._allDayEvents().map(this._renderAllDayEvent)}
-          </div>
+          {this._renderAllDayEvents()}
         </div>
 
         <div className="event-grid-wrap" ref="eventGridWrap">

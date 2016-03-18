@@ -8,31 +8,60 @@ export default class CalendarEvent extends React.Component {
   static propTypes = {
     event: React.PropTypes.instanceOf(Event).isRequired,
     order: React.PropTypes.number,
-    dayStart: React.PropTypes.number.isRequired,
+    scopeEnd: React.PropTypes.number.isRequired,
+    scopeStart: React.PropTypes.number.isRequired,
+    direction: React.PropTypes.oneOf(['horizontal', 'vertical']),
     concurrentEvents: React.PropTypes.number,
+    fixedMinorDimension: React.PropTypes.number,
   }
 
   static defaultProps = {
     order: 1,
+    direction: "vertical",
     concurrentEvents: 1,
+    fixedMinorDimension: -1,
   }
 
   _styles() {
-    const dayLen = moment.duration(1, 'day').subtract(1, 'second').as('seconds');
+    const scopeLen = this.props.scopeEnd - this.props.scopeStart
     const duration = this.props.event.end - this.props.event.start;
-    const top = Math.max((this.props.event.start - this.props.dayStart) / dayLen, 0);
-    const height = Math.min(duration / dayLen, 1);
-    const width = (1 / this.props.concurrentEvents);
-    const left = width * (this.props.order - 1);
+
+    let posDir = "top"
+    let sizeDir = "height"
+    let minorDimPos = "left"
+    let minorDimDir = "width"
+
+    if (this.props.direction === "horizontal") {
+      sizeDir = "width";
+      posDir = "left"
+      minorDimDir = "height"
+      minorDimPos = "top"
+    }
+
+    const pos = Math.max((this.props.event.start - this.props.scopeStart) / scopeLen, 0);
+    const size = Math.min(duration / scopeLen, 1);
+
+    let minorDim = 1;
+    let minorPos;
+    if (this.fixedMinorDimension === -1) {
+      minorDim = (1 / this.props.concurrentEvents);
+      minorPos = minorDim * (this.props.order - 1);
+    } else {
+      minorPos = this.props.fixedMinorDimension * (this.props.order - 1);
+    }
+
     const hue = Utils.hueForString(this.props.event.calendarId);
     const bgColor = `hsla(${hue}, 50%, 45%, 0.35)`
-    return {
-      top: `${top * 100}%`,
-      left: `${left * 100}%`,
-      width: `${width * 100}%`,
-      height: `${height * 100}%`,
+
+    const styles = {
       backgroundColor: bgColor,
     }
+    styles[posDir] = `${pos * 100}%`
+    styles[sizeDir] = `${size * 100}%`
+    styles[minorDimDir] = `${minorDim * 100}%`
+    styles[minorDimPos] = `${minorPos * 100}%`
+
+    return styles
   }
 
   render() {
