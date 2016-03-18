@@ -9,13 +9,34 @@
   }
 
   .calendar-event {
+    @interval-height: 21px;
     position: absolute;
-    padding: 5px;
+    padding: 4px 5px 5px 6px;
     background: rgba(0,0,0,0.05);
-    border-left: 2px solid rgba(0,0,0,0.1);
+    font-size: 11px;
+    line-height: 11px;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-height: @interval-height;
+
+    border-top: 0;
+    border-right: 2px solid @background-primary;
+    border-bottom: 2px solid @background-primary;
+    border-left: 0;
+    &:before {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background: rgba(0,0,0,0.1);
+    }
+
+    &.horizontal {
+      white-space: nowrap;
+    }
   }
 
   .week-view {
@@ -43,7 +64,7 @@
 
     .all-day-events {
       position: relative;
-      width: 100%;
+      width: auto;
       margin-left: 75px;
       z-index: 2;
     }
@@ -125,6 +146,7 @@
       position: relative;
       height: 100%;
       z-index: 1;
+      overflow: hidden;
       &.weekend {
         background: rgba(0,0,0,0.01);
       }

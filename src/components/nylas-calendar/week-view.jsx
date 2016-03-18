@@ -27,7 +27,7 @@ export default class WeekView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.MIN_INTERVAL_HEIGHT = 20;
+    this.MIN_INTERVAL_HEIGHT = 21;
     this.INTERVAL_TIME = moment.duration(30, 'minutes');
     this.DAY_DUR = moment.duration(1, 'day')
     this.state = {
@@ -143,7 +143,7 @@ export default class WeekView extends React.Component {
           concurrentEvents={eventOverlap[e.id].concurrentEvents}/>
       );
     });
-    const height = this._maxConcurrentEvents(eventOverlap) * DAY_HEIGHT
+    const height = (this._maxConcurrentEvents(eventOverlap) * DAY_HEIGHT) + 1
     return <div className="all-day-events" style={{height}}>{eventComponents}</div>
   }
 
@@ -192,24 +192,42 @@ export default class WeekView extends React.Component {
     for (const t of sortedTimes) {
       for (const e of times[t]) {
         if (e.start === t) {
-          overlapById[e.id] = {concurrentEvents: 1, order: 1}
+          overlapById[e.id] = {concurrentEvents: 1, order: null}
           startedEvents.push(e)
         }
         if (e.end === t) {
           startedEvents = _.reject(startedEvents, (o) => o.id === e.id)
         }
       }
-      let order = 1;
       for (const e of startedEvents) {
         if (!overlapById[e.id]) { overlapById[e.id] = {} }
-        let numEvents = overlapById[e.id].concurrentEvents || 1;
-        numEvents = Math.max(numEvents, startedEvents.length)
+        const numEvents = this._findMaxConcurrent(startedEvents, overlapById);
         overlapById[e.id].concurrentEvents = numEvents;
-        overlapById[e.id].order = order;
-        order += 1;
+        if (overlapById[e.id].order === null) {
+          // Dont' re-assign the order.
+          const order = this._findAvailableOrder(startedEvents, overlapById);
+          overlapById[e.id].order = order;
+        }
       }
     }
     return overlapById
+  }
+
+  _findMaxConcurrent(startedEvents, overlapById) {
+    let max = 1;
+    for (const e of startedEvents) {
+      max = Math.max((overlapById[e.id].concurrentEvents || 1), max);
+    }
+    return Math.max(max, startedEvents.length)
+  }
+
+  _findAvailableOrder(startedEvents, overlapById) {
+    const orders = startedEvents.map((e) => overlapById[e.id].order);
+    let order = 1;
+    while (true) {
+      if (orders.indexOf(order) === -1) { return order }
+      order += 1;
+    }
   }
 
   _maxConcurrentEvents(eventOverlap) {

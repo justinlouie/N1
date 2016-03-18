@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import classnames from 'classnames'
 import {Event, Utils} from 'nylas-exports'
 
 export default class CalendarEvent extends React.Component {
@@ -39,14 +39,17 @@ export default class CalendarEvent extends React.Component {
     }
 
     const pos = Math.max((this.props.event.start - this.props.scopeStart) / scopeLen, 0);
-    const size = Math.min(duration / scopeLen, 1);
+    const size = Math.min((duration - this._overflowBefore()) / scopeLen, 1);
 
     let minorDim = 1;
     let minorPos;
-    if (this.fixedMinorDimension === -1) {
-      minorDim = (1 / this.props.concurrentEvents);
+    if (this.props.fixedMinorDimension === -1) {
+      minorDim = 1 / this.props.concurrentEvents;
       minorPos = minorDim * (this.props.order - 1);
+      minorDim = `${minorDim * 100}%`;
+      minorPos = `${minorPos * 100}%`;
     } else {
+      minorDim = this.props.fixedMinorDimension
       minorPos = this.props.fixedMinorDimension * (this.props.order - 1);
     }
 
@@ -58,15 +61,34 @@ export default class CalendarEvent extends React.Component {
     }
     styles[posDir] = `${pos * 100}%`
     styles[sizeDir] = `${size * 100}%`
-    styles[minorDimDir] = `${minorDim * 100}%`
-    styles[minorDimPos] = `${minorPos * 100}%`
+    styles[minorDimDir] = minorDim
+    styles[minorDimPos] = minorPos
 
     return styles
   }
 
+  _overflowBefore() {
+    return Math.max(this.props.scopeStart - this.props.event.start, 0)
+  }
+
+  _overflowAfter() {
+    return Math.max(this.props.event.end - this.props.scopeEnd, -1)
+  }
+
+  _classNames() {
+    const cnames = {
+      "calendar-event": true,
+      "overflow-before": (this._overflowBefore() > 0),
+      "overflow-after": (this._overflowAfter() > 0),
+    };
+    cnames[this.props.direction] = true;
+    return classnames(cnames)
+  }
+
   render() {
     return (
-      <div className="calendar-event" style={this._styles()}>
+      <div className={`calendar-event ${this.props.direction}`}
+           style={this._styles()}>
         {this.props.event.title}
       </div>
     )
