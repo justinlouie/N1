@@ -27,6 +27,7 @@ export default class WeekView extends React.Component {
 
   constructor(props) {
     super(props);
+    this.DAYS_IN_VIEW = 21;
     this.MIN_INTERVAL_HEIGHT = 21;
     this.INTERVAL_TIME = moment.duration(30, 'minutes');
     this.DAY_DUR = moment.duration(1, 'day')
@@ -82,11 +83,11 @@ export default class WeekView extends React.Component {
 
   _startMoment(props) {
     // NOTE: weekday is Locale aware
-    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week())
+    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week() - 1)
   }
 
   _endMoment(props) {
-    return this._startMoment(props).add(1, 'week').subtract(1, 'millisecond')
+    return this._startMoment(props).add(3, 'week').subtract(1, 'millisecond')
   }
 
   _onEventsChange = (events = []) => {
@@ -130,7 +131,6 @@ export default class WeekView extends React.Component {
   }
 
   _renderAllDayEvents() {
-    const DAY_HEIGHT = 20
     const allDayEvents = this._allDayEvents()
     const eventOverlap = this._eventOverlap(allDayEvents);
     const eventComponents = allDayEvents.map((e) => {
@@ -139,12 +139,22 @@ export default class WeekView extends React.Component {
           scopeStart={this._startMoment(this.props).unix()}
           scopeEnd={this._endMoment(this.props).unix()}
           direction="horizontal"
-          fixedMinorDimension={DAY_HEIGHT}
+          fixedMinorDimension={this.MIN_INTERVAL_HEIGHT}
           concurrentEvents={eventOverlap[e.id].concurrentEvents}/>
       );
     });
-    const height = (this._maxConcurrentEvents(eventOverlap) * DAY_HEIGHT) + 1
+    const height = this._allDayEventHeight(eventOverlap)
     return <div className="all-day-events" style={{height}}>{eventComponents}</div>
+  }
+
+  _allDayEventHeight(precomputedOverlap) {
+    let eventOverlap;
+    if (!precomputedOverlap) {
+      eventOverlap = this._eventOverlap(this._allDayEvents());
+    } else {
+      eventOverlap = precomputedOverlap
+    }
+    return (this._maxConcurrentEvents(eventOverlap) * this.MIN_INTERVAL_HEIGHT) + 1
   }
 
   _eventsForDay(day) {
@@ -241,8 +251,7 @@ export default class WeekView extends React.Component {
   _days() {
     const start = this._startMoment(this.props);
     const days = []
-    const DAYS_IN_WEEK = 7;
-    for (let i = 0; i < DAYS_IN_WEEK; i++) {
+    for (let i = 0; i < this.DAYS_IN_VIEW; i++) {
       // moment::weekday is locale aware since some weeks start on diff
       // days. See http://momentjs.com/docs/#/get-set/weekday/
       days.push(moment(start).weekday(i))
@@ -382,10 +391,16 @@ export default class WeekView extends React.Component {
 
   _setIntervalHeight = () => {
     const wrap = React.findDOMNode(this.refs.eventGridWrap);
+    const wrapHeight = wrap.getBoundingClientRect().height;
     const numIntervals = Math.floor(this.DAY_DUR.as('seconds') / this.INTERVAL_TIME.as('seconds'));
+    React.findDOMNode(this.refs.eventGridLegendWrap).style.height = `${wrapHeight}px`;
     this.setState({
-      intervalHeight: Math.max(wrap.getBoundingClientRect().height / numIntervals, this.MIN_INTERVAL_HEIGHT),
+      intervalHeight: Math.max(wrapHeight / numIntervals, this.MIN_INTERVAL_HEIGHT),
     });
+  }
+
+  _onGridScroll = (event) => {
+    React.findDOMNode(this.refs.eventGridLegendWrap).scrollTop = event.target.scrollTop
   }
 
   _renderEventGridLabels() {
@@ -411,20 +426,31 @@ export default class WeekView extends React.Component {
           nextAction={this._onClickNextWeek}
           prevAction={this._onClickPrevWeek} />
 
-        <div className="week-header">
-          <div className="date-labels">
-            <div className="date-label-legend"><span className="legend-text">All Day</span></div>
-            {this._days().map(this._renderDateLabel)}
+        <div className="calendar-legend">
+          <div className="date-label-legend" style={{height: this._allDayEventHeight() + 75 + 1}}>
+            <span className="legend-text">All Day</span>
           </div>
-
-          {this._renderAllDayEvents()}
+          <div className="event-grid-legend-wrap" ref="eventGridLegendWrap">
+            <div className="event-grid-legend" style={{height: this._gridHeight()}}>
+              {this._renderEventGridLabels()}
+            </div>
+          </div>
         </div>
 
-        <div className="event-grid-wrap" ref="eventGridWrap">
-          <div className="event-grid" style={{height: this._gridHeight()}}>
-            <div className="event-grid-legend">{this._renderEventGridLabels()}</div>
-            {this._days().map(this._renderEventColumn)}
-            <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
+        <div className="calendar-area-wrap">
+          <div className="week-header">
+            <div className="date-labels">
+              {this._days().map(this._renderDateLabel)}
+            </div>
+
+            {this._renderAllDayEvents()}
+          </div>
+
+          <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll}>
+            <div className="event-grid" style={{height: this._gridHeight()}}>
+              {this._days().map(this._renderEventColumn)}
+              <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
+            </div>
           </div>
         </div>
 
