@@ -53,8 +53,11 @@ export default class CalendarEvent extends React.Component {
       minorPos = this.props.fixedMinorDimension * (this.props.order - 1);
     }
 
-    const hue = Utils.hueForString(this.props.event.calendarId);
-    const bgColor = `hsla(${hue}, 50%, 45%, 0.35)`
+    let bgColor = NylasEnv.config.get(`calendar.colors.${this.props.event.calendarId}`)
+    if (!bgColor) {
+      const hue = Utils.hueForString(this.props.event.calendarId);
+      bgColor = `hsla(${hue}, 50%, 45%, 0.35)`
+    }
 
     const styles = {
       backgroundColor: bgColor,
