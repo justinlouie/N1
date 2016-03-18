@@ -273,6 +273,37 @@ export default class WeekView extends React.Component {
     );
   }
 
+  _leftFooterControls() {
+    const opts = [
+      [30, 'minutes', '30 min'],
+      [50, 'minutes', '50 min'],
+      [1, 'hour', '1 hr'],
+      [1.5, 'hours', '1½ hr'],
+      [2, 'hours', '2 hr'],
+      [2.5, 'hours', '2½ hr'],
+      [3, 'hours', '3 hr'],
+    ]
+    const optComponents = opts.map((opt) => {
+      const d = moment.duration.apply(opt.slice(0, 2));
+      return <option value={d.seconds()}>{opt[2]}</option>
+    })
+
+    return (
+      <div className="duration-picker">
+      <label style={{paddingRight: 10}}>Event Duration:</label>
+      <select>{optComponents}</select>
+      </div>
+    );
+  }
+
+  _rightFooterControls() {
+    return (
+      <button className="btn btn-emphasis">
+      Done
+      </button>
+    );
+  }
+
   _onClickToday = () => {
     this.props.changeSelectedMoment(moment())
   }
@@ -397,7 +428,8 @@ export default class WeekView extends React.Component {
           </div>
         </div>
 
-        <FooterControls />
+        <FooterControls leftFooterControls={this._leftFooterControls()}
+            rightFooterControls={this._rightFooterControls()}/>
       </div>
     )
   }
