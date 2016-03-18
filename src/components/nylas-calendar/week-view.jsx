@@ -4,7 +4,7 @@ import React from 'react'
 import moment from 'moment'
 import classnames from 'classnames'
 import {RetinaImg} from 'nylas-component-kit'
-import {Event, Matcher, DatabaseStore} from 'nylas-exports'
+import {Event, Utils, Matcher, DatabaseStore} from 'nylas-exports'
 
 import TopBanner from './top-banner'
 import CalendarEvent from './calendar-event'
@@ -62,11 +62,22 @@ export default class WeekView extends React.Component {
   }
 
   _calEventSubscription(props) {
+    const end = Event.attributes.end
+    const start = Event.attributes.start
+    const weekStart = this._startMoment(props).unix()
+    const weekEnd = this._endMoment(props).unix()
+
+    const matcher = new Matcher.Or([
+      new Matcher.And([start.lte(weekEnd), end.gte(weekStart)]),
+      new Matcher.And([start.lte(weekEnd), start.gte(weekStart)]),
+      new Matcher.And([end.gte(weekStart), end.lte(weekEnd)]),
+      new Matcher.And([end.gte(weekEnd), start.lte(weekStart)]),
+    ]);
+
     return Rx.Observable.fromQuery(
-      DatabaseStore.findAll(Event).where(Matcher.Not(Matcher.Or([
-        Event.attributes.end.lessThan(this._startMoment(props).unix()),
-        Event.attributes.start.greaterThan(this._endMoment(props).unix()),
-      ])))).subscribe(this._onEventsChange);
+      DatabaseStore.findAll(Event)
+      .where(matcher))
+      .subscribe(this._onEventsChange);
   }
 
   _startMoment(props) {
@@ -118,11 +129,23 @@ export default class WeekView extends React.Component {
   }
 
   _eventsForDay(day) {
-    const dayStart = day.unix();
-    const dayEnd = this._dayEnd(day)
+    const bounds = {
+      start: day.unix(),
+      end: this._dayEnd(day),
+    }
     return _.filter(this.state.events, (event) => {
-      return !(event.end < dayStart || event.start > dayEnd)
-    })
+      return Utils.overlapsBounds(bounds, event) && !event.isAllDay()
+    });
+  }
+
+  _allDayEvents() {
+    const bounds = {
+      start: this._startMoment(this.props).unix(),
+      end: this._endMoment(this.props).unix(),
+    }
+    return _.filter(this.state.events, (event) => {
+      return Utils.overlapsBounds(bounds, event) && event.isAllDay()
+    });
   }
 
   _dayEnd(day) {
@@ -301,6 +324,12 @@ export default class WeekView extends React.Component {
     return labels.slice(0, labels.length - 1);
   }
 
+  _renderAllDayEvent(event) {
+    return (
+      <div className="all-day-event">{event.title}</div>
+    )
+  }
+
   render() {
     return (
       <div className="calendar-view week-view">
@@ -312,9 +341,15 @@ export default class WeekView extends React.Component {
           nextAction={this._onClickNextWeek}
           prevAction={this._onClickPrevWeek} />
 
-        <div className="date-labels">
-          <div className="date-label-legend"><span className="legend-text">All Day</span></div>
-          {this._days().map(this._renderDateLabel)}
+        <div className="week-header">
+          <div className="date-labels">
+            <div className="date-label-legend"><span className="legend-text">All Day</span></div>
+            {this._days().map(this._renderDateLabel)}
+          </div>
+
+          <div className="all-day-events">
+            {this._allDayEvents().map(this._renderAllDayEvent)}
+          </div>
         </div>
 
         <div className="event-grid-wrap" ref="eventGridWrap">

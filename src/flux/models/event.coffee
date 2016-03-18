@@ -168,6 +168,10 @@ class Event extends Model
         return @
     return @
 
+  isAllDay: ->
+    daySpan = moment.duration(1, 'day').subtract(1, 'second').as('seconds')
+    (@end - @start) >= daySpan
+
   participantForMe: =>
     for p in @participants
       if (new Contact(email: p.email)).isMe()

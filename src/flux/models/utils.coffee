@@ -551,3 +551,19 @@ Utils =
     reStr = "(#{prefixes.join("|")})"
     re = new RegExp(reStr, "gi")
     return re.test(email) or email.length > 64
+
+  # Does the several tests you need to determine if a test range is within
+  # a bounds. Expects both objects to have `start` and `end` keys.
+  # Compares any values with <= and >=.
+  overlapsBounds: (bounds, test) ->
+    # Fully enclosed
+    (test.start <= bounds.end and test.end >= bounds.start) or
+
+    # Starts in bounds. Ends out of bounds
+    (test.start <= bounds.end and test.start >= bounds.start) or
+
+    # Ends in bounds. Starts out of bounds
+    (test.end >= bounds.start and test.end <= bounds.end) or
+
+    # Spans entire boundary
+    (test.end >= bounds.end and test.start <= bounds.start)

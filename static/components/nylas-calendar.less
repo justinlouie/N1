@@ -25,9 +25,29 @@
 
     @legend-width: 75px;
 
-    .date-labels {
-      display: flex;
+    .week-header {
+      position: relative;
+      padding-top: 75px;
       border-bottom: 1px solid @border-color-divider;
+
+    }
+
+    .date-labels {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      height: 100%;
+      display: flex;
+    }
+
+    .all-day-events {
+      padding-left: 75px;
+    }
+
+    .all-day-legend {
+      width: @legend-width;
+      position: relative;
     }
 
     .legend-text {
@@ -44,6 +64,7 @@
         bottom: 7px;
       }
     }
+
     .day-label-wrap {
       padding: 15px;
       text-align: center;

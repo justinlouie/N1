@@ -63,6 +63,8 @@ class Matcher
       when '=' then return modelValue == matcherValue
       when '<' then return modelValue < matcherValue
       when '>' then return modelValue > matcherValue
+      when '<=' then return modelValue <= matcherValue
+      when '>=' then return modelValue >= matcherValue
       when 'in' then return modelValue in matcherValue
       when 'contains'
         !!modelArrayContainsValue(modelValue, matcherValue)
