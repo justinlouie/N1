@@ -29,7 +29,8 @@ export default class WeekView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.DAYS_IN_VIEW = 21;
+    this.DAYS_IN_VIEW = 7;
+    this.BUFFER_DAYS = 7; // in each direction
     this.MIN_INTERVAL_HEIGHT = 21;
     this.INTERVAL_TIME = moment.duration(30, 'minutes');
     this.DAY_DUR = moment.duration(1, 'day')
@@ -47,7 +48,7 @@ export default class WeekView extends React.Component {
     this._renderEventGridBg()
     this._centerScrollRegion()
     this._setIntervalHeight()
-    const weekStart = this._startMoment(this.props).add(1, 'week').unix()
+    const weekStart = this._startMoment(this.props).add(this.BUFFER_DAYS, 'days').unix()
     this._scrollTime = weekStart
     this._ensureHorizontalScrollPos()
     window.addEventListener('resize', this._setIntervalHeight, true)
@@ -89,11 +90,11 @@ export default class WeekView extends React.Component {
 
   _startMoment(props) {
     // NOTE: weekday is Locale aware
-    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week() - 1)
+    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week()).subtract(this.BUFFER_DAYS, 'days')
   }
 
   _endMoment(props) {
-    return this._startMoment(props).add(3, 'week').subtract(1, 'millisecond')
+    return this._startMoment(props).add(this.BUFFER_DAYS * 2 + this.DAYS_IN_VIEW, 'days').subtract(1, 'millisecond')
   }
 
   _onEventsChange = (events = []) => {
@@ -257,7 +258,7 @@ export default class WeekView extends React.Component {
   _days() {
     const start = this._startMoment(this.props);
     const days = []
-    for (let i = 0; i < this.DAYS_IN_VIEW; i++) {
+    for (let i = 0; i < (this.DAYS_IN_VIEW + this.BUFFER_DAYS * 2); i++) {
       // moment::weekday is locale aware since some weeks start on diff
       // days. See http://momentjs.com/docs/#/get-set/weekday/
       days.push(moment(start).weekday(i))
@@ -266,8 +267,8 @@ export default class WeekView extends React.Component {
   }
 
   _currentWeekText() {
-    const start = this._startMoment(this.props).add(1, 'week');
-    const end = this._endMoment(this.props).subtract(1, 'week');
+    const start = this._startMoment(this.props).add(this.BUFFER_DAYS, 'days');
+    const end = this._endMoment(this.props).subtract(this.BUFFER_DAYS, 'days');
     return `${start.format("MMMM D")} - ${end.format("MMMM D YYYY")}`
   }
 
@@ -444,6 +445,10 @@ export default class WeekView extends React.Component {
     return labels.slice(0, labels.length - 1);
   }
 
+  _bufferRatio() {
+    return (this.BUFFER_DAYS * 2 + this.DAYS_IN_VIEW) / this.DAYS_IN_VIEW
+  }
+
   render() {
     return (
       <div className="calendar-view week-view">
@@ -468,7 +473,7 @@ export default class WeekView extends React.Component {
 
         <div className="calendar-area-wrap" ref="calendarAreaWrap"
              onScroll={this._onScrollCalWrap}>
-          <div className="week-header">
+          <div className="week-header" style={{width: `${this._bufferRatio() * 100}%`}}>
             <div className="date-labels">
               {this._days().map(this._renderDateLabel)}
             </div>
@@ -476,7 +481,7 @@ export default class WeekView extends React.Component {
             {this._renderAllDayEvents()}
           </div>
 
-          <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll}>
+          <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll} style={{width: `${this._bufferRatio() * 100}%`}}>
             <div className="event-grid" style={{height: this._gridHeight()}}>
               {this._days().map(this._renderEventColumn)}
               <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
