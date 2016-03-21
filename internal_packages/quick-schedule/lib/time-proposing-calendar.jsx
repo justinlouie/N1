@@ -1,10 +1,18 @@
 import React from 'react'
 import moment from 'moment'
+import ScheduleActions from './schedule-actions'
 import {NylasCalendar} from 'nylas-component-kit'
 // import ProposedTimeStore from './proposed-time-store'
 
 export default class TimeProposingCalendar extends React.Component {
   static displayName = "TimeProposingCalendar";
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      duration: moment.duration(1, 'hour').as('seconds'),
+    }
+  }
 
   _footerControls = ({currentView}) => {
     if (currentView !== NylasCalendar.WEEK_VIEW) { return null }
@@ -16,6 +24,7 @@ export default class TimeProposingCalendar extends React.Component {
 
   _leftFooterControls() {
     const opts = [
+      [15, 'minutes', '15 min'],
       [30, 'minutes', '30 min'],
       [50, 'minutes', '50 min'],
       [1, 'hour', '1 hr'],
@@ -25,16 +34,21 @@ export default class TimeProposingCalendar extends React.Component {
       [3, 'hours', '3 hr'],
     ]
     const optComponents = opts.map((opt) => {
-      const d = moment.duration.apply(opt.slice(0, 2));
-      return <option value={d.seconds()}>{opt[2]}</option>
+      const d = moment.duration.apply(null, opt.slice(0, 2));
+      return <option value={d.as('seconds')}>{opt[2]}</option>
     })
 
     return (
       <div className="duration-picker">
-      <label style={{paddingRight: 10}}>Event Duration:</label>
-      <select>{optComponents}</select>
+        <label style={{paddingRight: 10}}>Event Duration:</label>
+        <select value={this.state.duration}
+                onChange={this._onChangeDuration}>{optComponents}</select>
       </div>
     );
+  }
+
+  _onChangeDuration = (event) => {
+    this.setState({duration: event.target.value});
   }
 
   _rightFooterControls() {
@@ -55,15 +69,18 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _onMouseUp(event, time) {
-    console.log(time ? time.format("LLL") : null)
+    if (!time) { return }
+    ScheduleActions.paintTime(time)
   }
 
   _onMouseMove(event, time) {
-    console.log(time ? time.format("LLL") : null)
+    if (!time) { return }
+    ScheduleActions.paintTime(time)
   }
 
   _onMouseDown(event, time) {
-    console.log(time ? time.format("LLL") : null)
+    if (!time) { return }
+    ScheduleActions.paintTime(time)
   }
 
   _additionalDataSource() {
