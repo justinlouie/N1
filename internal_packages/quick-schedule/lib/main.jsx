@@ -1,16 +1,20 @@
 /** @babel */
 
 import CalendarButton from './calendar-button'
+import ProposedTimeStore from './proposed-time-store'
+import TimeProposingCalendar from './time-proposing-calendar'
 import {ComponentRegistry, WorkspaceStore} from 'nylas-exports'
-import {NylasCalendar} from 'nylas-component-kit'
 
 export function activate() {
   if (NylasEnv.getWindowType() === 'calendar') {
+    this.proposedTimeStore = new ProposedTimeStore()
+    this.proposedTimeStore.activate()
+
     NylasEnv.getCurrentWindow().setMinimumSize(480, 250)
     WorkspaceStore.defineSheet('Main', {root: true},
       {popout: ['Center']})
 
-    ComponentRegistry.register(NylasCalendar,
+    ComponentRegistry.register(TimeProposingCalendar,
       {location: WorkspaceStore.Location.Center})
   } else {
     ComponentRegistry.register(CalendarButton,
@@ -22,8 +26,10 @@ export function serialize() {
 }
 
 export function deactivate() {
+  this.proposedTimeStore.deactivate()
+
   if (NylasEnv.getWindowType() === 'calendar') {
-    console.log("it works!");
+    ComponentRegistry.unregister(TimeProposingCalendar);
   } else {
     ComponentRegistry.unregister(CalendarButton);
   }

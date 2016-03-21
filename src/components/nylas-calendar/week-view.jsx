@@ -18,8 +18,18 @@ export default class WeekView extends React.Component {
 
   static propTypes = {
     selectedMoment: React.PropTypes.instanceOf(moment).isRequired,
+    headerControls: React.PropTypes.shape({
+      left: React.PropTypes.node,
+      right: React.PropTypes.node,
+    }),
+    footerControls: React.PropTypes.shape({
+      left: React.PropTypes.node,
+      right: React.PropTypes.node,
+    }),
     changeCurrentView: React.PropTypes.func,
+    interactionHandlers: React.PropTypes.objectOf(React.PropTypes.func),
     changeSelectedMoment: React.PropTypes.func,
+    additionalDataSource: React.PropTypes.func,
   }
 
   static defaultProps = {
@@ -273,6 +283,9 @@ export default class WeekView extends React.Component {
   }
 
   _leftHeaderControls() {
+    if ((this.props.headerControls || {}).left) {
+      return this.props.headerControls.left
+    }
     return (
       <button className="btn" onClick={this._onClickToday}>
         Today
@@ -281,6 +294,9 @@ export default class WeekView extends React.Component {
   }
 
   _rightHeaderControls() {
+    if ((this.props.headerControls || {}).right) {
+      return this.props.headerControls.right
+    }
     return (
       <button className="btn">
         <RetinaImg name="ic-calendar-month.png"
@@ -290,34 +306,17 @@ export default class WeekView extends React.Component {
   }
 
   _leftFooterControls() {
-    const opts = [
-      [30, 'minutes', '30 min'],
-      [50, 'minutes', '50 min'],
-      [1, 'hour', '1 hr'],
-      [1.5, 'hours', '1½ hr'],
-      [2, 'hours', '2 hr'],
-      [2.5, 'hours', '2½ hr'],
-      [3, 'hours', '3 hr'],
-    ]
-    const optComponents = opts.map((opt) => {
-      const d = moment.duration.apply(opt.slice(0, 2));
-      return <option value={d.seconds()}>{opt[2]}</option>
-    })
-
-    return (
-      <div className="duration-picker">
-      <label style={{paddingRight: 10}}>Event Duration:</label>
-      <select>{optComponents}</select>
-      </div>
-    );
+    if ((this.props.footerControls || {}).left) {
+      return this.props.footerControls.left
+    }
+    return false
   }
 
   _rightFooterControls() {
-    return (
-      <button className="btn btn-emphasis">
-      Done
-      </button>
-    );
+    if ((this.props.footerControls || {}).right) {
+      return this.props.footerControls.right
+    }
+    return false
   }
 
   _onClickToday = () => {
