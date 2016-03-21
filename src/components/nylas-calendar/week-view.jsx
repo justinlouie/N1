@@ -418,7 +418,7 @@ export default class WeekView extends React.Component {
     this._scrollTime = weekStart + ((weekEnd - weekStart) * percent)
     if (percent < 0.25) {
       this._onClickPrevWeek()
-    } else if (percent + 0.33 > 0.95) {
+    } else if (percent + (this.DAYS_IN_VIEW / (this.BUFFER_DAYS * 2 + this.DAYS_IN_VIEW)) > 0.95) {
       this._onClickNextWeek()
     }
   }
