@@ -58,6 +58,10 @@ export default class TimeProposingCalendar extends React.Component {
     // return ProposedTimeStore
   }
 
+  static containerStyles = {
+    height: "100%",
+  }
+
   render() {
     return (
       <NylasCalendar footerControls={this._footerControls}
