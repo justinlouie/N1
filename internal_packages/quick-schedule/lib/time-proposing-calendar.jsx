@@ -1,8 +1,9 @@
+import Rx from 'rx-lite'
 import React from 'react'
-import moment from 'moment'
-import ScheduleActions from './schedule-actions'
+import {Utils} from 'nylas-exports'
 import {NylasCalendar} from 'nylas-component-kit'
-// import ProposedTimeStore from './proposed-time-store'
+import ScheduleActions from './schedule-actions'
+import ProposedTimeStore from './proposed-time-store'
 
 export default class TimeProposingCalendar extends React.Component {
   static displayName = "TimeProposingCalendar";
@@ -10,8 +11,23 @@ export default class TimeProposingCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      duration: moment.duration(1, 'hour').as('seconds'),
+      duration: ProposedTimeStore.currentDuration(),
     }
+  }
+
+  componentDidMount() {
+    this._usub = ProposedTimeStore.listen(() => {
+      this.setState({duration: ProposedTimeStore.currentDuration()});
+    })
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (!Utils.isEqualReact(nextProps, this.props) ||
+            !Utils.isEqualReact(nextState, this.state));
+  }
+
+  componentWillUnmount() {
+    this._usub()
   }
 
   _footerControls = ({currentView}) => {
@@ -23,19 +39,8 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _leftFooterControls() {
-    const opts = [
-      [15, 'minutes', '15 min'],
-      [30, 'minutes', '30 min'],
-      [50, 'minutes', '50 min'],
-      [1, 'hour', '1 hr'],
-      [1.5, 'hours', '1½ hr'],
-      [2, 'hours', '2 hr'],
-      [2.5, 'hours', '2½ hr'],
-      [3, 'hours', '3 hr'],
-    ]
-    const optComponents = opts.map((opt) => {
-      const d = moment.duration.apply(null, opt.slice(0, 2));
-      return <option value={d.as('seconds')}>{opt[2]}</option>
+    const optComponents = ProposedTimeStore.Durations().map((opt) => {
+      return <option value={opt.join(",")}>{opt[2]}</option>
     })
 
     return (
@@ -48,7 +53,7 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _onChangeDuration = (event) => {
-    this.setState({duration: event.target.value});
+    ScheduleActions.changeDuration(event.target.value.split(","))
   }
 
   _rightFooterControls() {
@@ -84,8 +89,7 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _additionalDataSource() {
-    return null
-    // return ProposedTimeStore
+    return Rx.Observable.fromStore(ProposedTimeStore).map((store) => store.timeBlocksAsEvents())
   }
 
   static containerStyles = {

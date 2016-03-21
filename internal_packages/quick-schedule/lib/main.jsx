@@ -7,8 +7,7 @@ import {ComponentRegistry, WorkspaceStore} from 'nylas-exports'
 
 export function activate() {
   if (NylasEnv.getWindowType() === 'calendar') {
-    this.proposedTimeStore = new ProposedTimeStore()
-    this.proposedTimeStore.activate()
+    ProposedTimeStore.activate()
 
     NylasEnv.getCurrentWindow().setMinimumSize(480, 250)
     WorkspaceStore.defineSheet('Main', {root: true},
@@ -26,7 +25,7 @@ export function serialize() {
 }
 
 export function deactivate() {
-  this.proposedTimeStore.deactivate()
+  ProposedTimeStore.deactivate()
 
   if (NylasEnv.getWindowType() === 'calendar') {
     ComponentRegistry.unregister(TimeProposingCalendar);

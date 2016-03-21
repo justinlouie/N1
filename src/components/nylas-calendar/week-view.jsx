@@ -30,7 +30,7 @@ export default class WeekView extends React.Component {
     changeCurrentView: React.PropTypes.func,
     interactionHandlers: React.PropTypes.objectOf(React.PropTypes.func),
     changeSelectedMoment: React.PropTypes.func,
-    additionalDataSource: React.PropTypes.func,
+    additionalDataSource: React.PropTypes.instanceOf(Rx.Observable),
   }
 
   static defaultProps = {
@@ -47,6 +47,7 @@ export default class WeekView extends React.Component {
     this.DAY_DUR = moment.duration(1, 'day')
     this.state = {
       events: [],
+      additionalData: [],
       intervalHeight: this.MIN_INTERVAL_HEIGHT,
     }
   }
@@ -93,10 +94,14 @@ export default class WeekView extends React.Component {
       new Matcher.And([end.gte(weekEnd), start.lte(weekStart)]),
     ]);
 
-    return Rx.Observable.fromQuery(
-      DatabaseStore.findAll(Event)
-      .where(matcher))
-      .subscribe(this._onEventsChange);
+    const query = DatabaseStore.findAll(Event).where(matcher)
+    const $sets = [Rx.Observable.fromQuery(query)]
+
+    if (this.props.additionalDataSource) {
+      $sets.push(this.props.additionalDataSource)
+    }
+
+    Rx.Observable.combineLatest($sets).subscribe(this._onEventsChange)
   }
 
   _startMoment(props) {
@@ -108,7 +113,16 @@ export default class WeekView extends React.Component {
     return this._startMoment(props).add(this.BUFFER_DAYS * 2 + this.DAYS_IN_VIEW, 'days').subtract(1, 'millisecond')
   }
 
-  _onEventsChange = (events = []) => {
+  _onEventsChange = (dataSources = []) => {
+    let events = dataSources[0]
+    if (events.length === 0) {
+      events = this.state.events;
+    }
+    const additionalData = dataSources[1]
+    console.log(additionalData)
+    if (additionalData.length > 0) {
+      events = events.concat(additionalData)
+    }
     this.setState({events})
   }
 
