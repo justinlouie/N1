@@ -10,6 +10,7 @@ import TopBanner from './top-banner'
 import CalendarEvent from './calendar-event'
 import HeaderControls from './header-controls'
 import FooterControls from './footer-controls'
+import CalendarMouseHandler from './calendar-mouse-handler'
 
 const overlapsBounds = Utils.overlapsBounds;
 
@@ -144,7 +145,7 @@ export default class WeekView extends React.Component {
       "event-column": true,
       "weekend": day.day() === 0 || day.day() === 6,
     });
-    return <div className={className}>{eventComponents}</div>
+    return <div className={className} data-start={day.valueOf()} data-end={moment(day).add(1, 'day').subtract(1, 'millisecond').valueOf()}>{eventComponents}</div>
   }
 
   _renderAllDayEvents() {
@@ -451,45 +452,47 @@ export default class WeekView extends React.Component {
   render() {
     return (
       <div className="calendar-view week-view">
-        <TopBanner />
+        <CalendarMouseHandler interactionHandlers={this.props.interactionHandlers}>
+          <TopBanner />
 
-        <HeaderControls title={this._currentWeekText()}
-          leftHeaderControls={this._leftHeaderControls()}
-          rightHeaderControls={this._rightHeaderControls()}
-          nextAction={this._onClickNextWeek}
-          prevAction={this._onClickPrevWeek} />
+          <HeaderControls title={this._currentWeekText()}
+            leftHeaderControls={this._leftHeaderControls()}
+            rightHeaderControls={this._rightHeaderControls()}
+            nextAction={this._onClickNextWeek}
+            prevAction={this._onClickPrevWeek} />
 
-        <div className="calendar-legend">
-          <div className="date-label-legend" style={{height: this._allDayEventHeight() + 75 + 1}}>
-            <span className="legend-text">All Day</span>
-          </div>
-          <div className="event-grid-legend-wrap" ref="eventGridLegendWrap">
-            <div className="event-grid-legend" style={{height: this._gridHeight()}}>
-              {this._renderEventGridLabels()}
+          <div className="calendar-legend">
+            <div className="date-label-legend" style={{height: this._allDayEventHeight() + 75 + 1}}>
+              <span className="legend-text">All Day</span>
+            </div>
+            <div className="event-grid-legend-wrap" ref="eventGridLegendWrap">
+              <div className="event-grid-legend" style={{height: this._gridHeight()}}>
+                {this._renderEventGridLabels()}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="calendar-area-wrap" ref="calendarAreaWrap"
-             onScroll={this._onScrollCalWrap}>
-          <div className="week-header" style={{width: `${this._bufferRatio() * 100}%`}}>
-            <div className="date-labels">
-              {this._days().map(this._renderDateLabel)}
+          <div className="calendar-area-wrap" ref="calendarAreaWrap"
+               onScroll={this._onScrollCalWrap}>
+            <div className="week-header" style={{width: `${this._bufferRatio() * 100}%`}}>
+              <div className="date-labels">
+                {this._days().map(this._renderDateLabel)}
+              </div>
+
+              {this._renderAllDayEvents()}
             </div>
 
-            {this._renderAllDayEvents()}
-          </div>
-
-          <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll} style={{width: `${this._bufferRatio() * 100}%`}}>
-            <div className="event-grid" style={{height: this._gridHeight()}}>
-              {this._days().map(this._renderEventColumn)}
-              <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
+            <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll} style={{width: `${this._bufferRatio() * 100}%`}}>
+              <div className="event-grid" style={{height: this._gridHeight()}}>
+                {this._days().map(this._renderEventColumn)}
+                <canvas className="event-grid-bg" ref="eventGridBg" style={{width: "100%", height: this._gridHeight()}}></canvas>
+              </div>
             </div>
           </div>
-        </div>
 
-        <FooterControls leftFooterControls={this._leftFooterControls()}
-            rightFooterControls={this._rightFooterControls()}/>
+          <FooterControls leftFooterControls={this._leftFooterControls()}
+              rightFooterControls={this._rightFooterControls()}/>
+        </CalendarMouseHandler>
       </div>
     )
   }

@@ -45,12 +45,25 @@ export default class TimeProposingCalendar extends React.Component {
     );
   }
 
-  _interactionHandlers({currentView}) {
+  _interactionHandlers = ({currentView}) => {
     if (currentView !== NylasCalendar.WEEK_VIEW) { return null }
     return {
       onMouseDown: this._onMouseDown,
+      onMouseMove: this._onMouseMove,
       onMouseUp: this._onMouseUp,
     }
+  }
+
+  _onMouseUp(event, time) {
+    console.log(time ? time.format("LLL") : null)
+  }
+
+  _onMouseMove(event, time) {
+    console.log(time ? time.format("LLL") : null)
+  }
+
+  _onMouseDown(event, time) {
+    console.log(time ? time.format("LLL") : null)
   }
 
   _additionalDataSource() {
