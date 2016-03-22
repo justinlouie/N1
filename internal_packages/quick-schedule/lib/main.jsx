@@ -1,6 +1,7 @@
 /** @babel */
 
 import CalendarButton from './calendar-button'
+import ProposedTimeEvent from './propsed-time-event'
 import ProposedTimeStore from './proposed-time-store'
 import TimeProposingCalendar from './time-proposing-calendar'
 import {ComponentRegistry, WorkspaceStore} from 'nylas-exports'
@@ -13,11 +14,14 @@ export function activate() {
     WorkspaceStore.defineSheet('Main', {root: true},
       {popout: ['Center']})
 
+    ComponentRegistry.register(ProposedTimeEvent,
+      {role: 'Calendar:Event:Right'});
+
     ComponentRegistry.register(TimeProposingCalendar,
       {location: WorkspaceStore.Location.Center})
   } else {
     ComponentRegistry.register(CalendarButton,
-        {role: 'Composer:ActionButton'});
+      {role: 'Composer:ActionButton'});
   }
 }
 

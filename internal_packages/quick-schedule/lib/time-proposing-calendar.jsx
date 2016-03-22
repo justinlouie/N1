@@ -58,7 +58,7 @@ export default class TimeProposingCalendar extends React.Component {
 
   _rightFooterControls() {
     return (
-      <button className="btn btn-emphasis">
+      <button className="btn btn-emphasis" onClick={this._onDone}>
       Done
       </button>
     );

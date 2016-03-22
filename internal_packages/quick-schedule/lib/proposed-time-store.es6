@@ -13,6 +13,8 @@ require('moment-round')
  *
  */
 class ProposedTimeStore extends NylasStore {
+  CALENDAR_ID() { return "QUICK_SCHEDULE" }
+
   Durations() {
     return [
       [15, 'minutes', '15 min'],
@@ -57,7 +59,7 @@ class ProposedTimeStore extends NylasStore {
     return _.map(this.timeBlocks(), (data, start) => {
       return new Event().fromJSON({
         title: "Proposed Time",
-        calendar_id: "QUICK SCHEDULE",
+        calendar_id: this.CALENDAR_ID(),
         when: {
           object: "timespan",
           start_time: moment(+start).unix(),

@@ -1,6 +1,7 @@
 import React from 'react'
 import classnames from 'classnames'
 import {Event, Utils} from 'nylas-exports'
+import {InjectedComponentSet} from 'nylas-component-kit'
 
 export default class CalendarEvent extends React.Component {
   static displayName = "CalendarEvent";
@@ -92,7 +93,15 @@ export default class CalendarEvent extends React.Component {
     return (
       <div className={`calendar-event ${this.props.direction}`}
            style={this._styles()}>
-        {this.props.event.title}
+        <span className="default-header">{this.props.event.title}</span>
+        <InjectedComponentSet
+          matching={{role: "Calendar:Event:Left"}}
+          exposedProps={{event: this.props.event}}
+          direction="row"/>
+        <InjectedComponentSet
+          matching={{role: "Calendar:Event:Right"}}
+          exposedProps={{event: this.props.event}}
+          direction="row"/>
       </div>
     )
   }
