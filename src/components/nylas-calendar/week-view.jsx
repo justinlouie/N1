@@ -8,10 +8,10 @@ import {Event, Utils, Matcher, DatabaseStore} from 'nylas-exports'
 
 import TopBanner from './top-banner'
 import EventGridBg from './event-grid-bg'
-import CalendarEvent from './calendar-event'
 import HeaderControls from './header-controls'
 import FooterControls from './footer-controls'
 import WeekViewEventColumn from './week-view-event-column'
+import WeekViewAllDayEvents from './week-view-all-day-events'
 import CalendarMouseHandler from './calendar-mouse-handler'
 
 const overlapsBounds = Utils.overlapsBounds;
@@ -165,21 +165,21 @@ export default class WeekView extends React.Component {
     )
   }
 
-  _renderAllDayEvents(allDayEvents, allDayOverlap) {
-    const eventComponents = allDayEvents.map((e) => {
-      return (
-        <CalendarEvent event={e} order={allDayOverlap[e.id].order}
-          key={e.id}
-          scopeStart={this._startMoment(this.props).unix()}
-          scopeEnd={this._endMoment(this.props).unix()}
-          direction="horizontal"
-          fixedMinorDimension={this.MIN_INTERVAL_HEIGHT}
-          concurrentEvents={allDayOverlap[e.id].concurrentEvents}/>
-      );
-    });
-    const height = this._allDayEventHeight(allDayOverlap)
-    return <div className="all-day-events" style={{height}}>{eventComponents}</div>
-  }
+  // _renderAllDayEvents(allDayEvents, allDayOverlap) {
+  //   const eventComponents = allDayEvents.map((e) => {
+  //     return (
+  //       <CalendarEvent event={e} order={allDayOverlap[e.id].order}
+  //         key={e.id}
+  //         scopeStart={this._startMoment(this.props).unix()}
+  //         scopeEnd={this._endMoment(this.props).unix()}
+  //         direction="horizontal"
+  //         fixedMinorDimension={this.MIN_INTERVAL_HEIGHT}
+  //         concurrentEvents={allDayOverlap[e.id].concurrentEvents}/>
+  //     );
+  //   });
+  //   const height = this._allDayEventHeight(allDayOverlap)
+  //   return <div className="all-day-events" style={{height}}>{eventComponents}</div>
+  // }
 
   _allDayEventHeight(allDayOverlap) {
     return (this._maxConcurrentEvents(allDayOverlap) * this.MIN_INTERVAL_HEIGHT) + 1
@@ -510,7 +510,13 @@ export default class WeekView extends React.Component {
                 {days.map(this._renderDateLabel)}
               </div>
 
-              {this._renderAllDayEvents(eventsByDay.allDay, allDayOverlap)}
+              <WeekViewAllDayEvents
+                minorDim={this.MIN_INTERVAL_HEIGHT}
+                end={this._endMoment(this.props).unix()}
+                height={this._allDayEventHeight(allDayOverlap)}
+                start={this._startMoment(this.props).unix()}
+                allDayEvents={eventsByDay.allDay}
+                allDayOverlap={allDayOverlap} />
             </div>
 
             <div className="event-grid-wrap" ref="eventGridWrap" onScroll={this._onGridScroll} style={{width: `${this._bufferRatio() * 100}%`}}>

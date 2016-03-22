@@ -4,6 +4,12 @@ import classnames from 'classnames'
 import CalendarEvent from './calendar-event'
 import {Event, Utils} from 'nylas-exports'
 
+/**
+ * This display a single column of events in the Week View.
+ * Putting it in its own component dramatically improves render
+ * performance since we can run `shouldComponentUpdate` on a
+ * column-by-column basis.
+ */
 export default class WeekViewEventColumn extends React.Component {
   static displayName = "WeekViewEventColumn";
 
