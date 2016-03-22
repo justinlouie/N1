@@ -2,7 +2,7 @@ import React from 'react'
 import moment from 'moment'
 import classnames from 'classnames'
 import CalendarEvent from './calendar-event'
-import {Event, Utils} from 'nylas-exports'
+import {Utils} from 'nylas-exports'
 
 /**
  * This display a single column of events in the Week View.
@@ -14,7 +14,7 @@ export default class WeekViewEventColumn extends React.Component {
   static displayName = "WeekViewEventColumn";
 
   static propTypes = {
-    events: React.PropTypes.arrayOf(Event).isRequired,
+    events: React.PropTypes.array.isRequired,
     day: React.PropTypes.instanceOf(moment),
     dayEnd: React.PropTypes.number,
     eventOverlap: React.PropTypes.object,

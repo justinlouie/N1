@@ -142,7 +142,7 @@ export default class WeekView extends React.Component {
       "is-today": this._isToday(day),
     })
     return (
-      <div className={className}>
+      <div className={className} key={day.valueOf()}>
         <span className="date-label">{day.format("D")}</span>
         <span className="weekday-label">{day.format("ddd")}</span>
       </div>
@@ -427,7 +427,7 @@ export default class WeekView extends React.Component {
     for (const {time, yPos} of this._tickGenerator({type: "major"})) {
       const hr = time.format("LT"); // Locale time. 2:00 pm or 14:00
       const style = {top: yPos - centering}
-      labels.push(<span className="legend-text" style={style}>{hr}</span>)
+      labels.push(<span className="legend-text" key={yPos} style={style}>{hr}</span>)
       centering = 8; // center all except the 1st one.
     }
     return labels.slice(0, labels.length - 1);

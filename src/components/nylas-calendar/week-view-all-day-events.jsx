@@ -1,6 +1,6 @@
 import React from 'react'
 import CalendarEvent from './calendar-event'
-import {Event, Utils} from 'nylas-exports'
+import {Utils} from 'nylas-exports'
 
 /**
  * Displays the all day events across the top bar of the week event view.
@@ -17,7 +17,7 @@ export default class WeekViewAllDayEvents extends React.Component {
     start: React.PropTypes.number,
     height: React.PropTypes.number,
     minorDim: React.PropTypes.number,
-    allDayEvents: React.PropTypes.arrayOf(Event),
+    allDayEvents: React.PropTypes.array,
     allDayOverlap: React.PropTypes.object,
   }
 

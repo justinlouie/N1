@@ -39,14 +39,14 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _leftFooterControls() {
-    const optComponents = ProposedTimeStore.Durations().map((opt) => {
-      return <option value={opt.join(",")}>{opt[2]}</option>
+    const optComponents = ProposedTimeStore.Durations().map((opt, i) => {
+      return <option value={opt.join("|")} key={i}>{opt[2]}</option>
     })
 
     return (
       <div className="duration-picker">
         <label style={{paddingRight: 10}}>Event Duration:</label>
-        <select value={this.state.duration}
+        <select value={this.state.duration.join("|")}
                 onChange={this._onChangeDuration}>{optComponents}</select>
       </div>
     );
