@@ -28,7 +28,7 @@ class ProposedTimeStore extends NylasStore {
 
   activate() {
     this._paintTimes = []
-    this.triggerLater = _.debounce(this.trigger, 32)
+    // this.triggerLater = _.throttle(this.trigger, 32)
     this._duration = this.Durations()[3] // 1 hr
     this.unsubscribers = [
       ScheduleActions.paintTime.listen(this._onPaintTime),
@@ -73,7 +73,7 @@ class ProposedTimeStore extends NylasStore {
    */
   _onPaintTime = (newMoment) => {
     this._paintTimes.push(newMoment);
-    this.triggerLater()
+    this.trigger()
   }
 
   _onChangeDuration = (newDuration) => {

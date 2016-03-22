@@ -169,7 +169,7 @@ class Event extends Model
     return @
 
   isAllDay: ->
-    daySpan = moment.duration(1, 'day').subtract(1, 'second').as('seconds')
+    daySpan = 86400 - 1
     (@end - @start) >= daySpan
 
   participantForMe: =>
