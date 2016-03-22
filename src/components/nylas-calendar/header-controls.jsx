@@ -1,4 +1,5 @@
 import React from 'react'
+import {Utils} from 'nylas-exports'
 import {RetinaImg} from 'nylas-component-kit'
 
 export default class HeaderControls extends React.Component {
@@ -15,6 +16,11 @@ export default class HeaderControls extends React.Component {
   static defaultProps = {
     leftHeaderControls: false,
     rightHeaderControls: false,
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (!Utils.isEqualReact(nextProps, this.props) ||
+            !Utils.isEqualReact(nextState, this.state));
   }
 
   _renderNextAction() {

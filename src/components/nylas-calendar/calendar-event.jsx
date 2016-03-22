@@ -89,7 +89,6 @@ export default class CalendarEvent extends React.Component {
   }
 
   render() {
-    console.log(this.props.event.title)
     return (
       <div className={`calendar-event ${this.props.direction}`}
            style={this._styles()}>

@@ -1,4 +1,5 @@
 import React from 'react'
+import {Utils} from 'nylas-exports'
 
 export default class EventGridBg extends React.Component {
   static displayName = "EventGridBg";
@@ -17,6 +18,11 @@ export default class EventGridBg extends React.Component {
 
   componentDidMount() {
     this._renderEventGridBg()
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (!Utils.isEqualReact(nextProps, this.props) ||
+            !Utils.isEqualReact(nextState, this.state));
   }
 
   componentDidUpdate() {

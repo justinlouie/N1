@@ -1,4 +1,5 @@
 import React from 'react'
+import {Utils} from 'nylas-exports'
 
 export default class FooterControls extends React.Component {
   static displayName = "FooterControls";
@@ -11,6 +12,11 @@ export default class FooterControls extends React.Component {
   static defaultProps = {
     leftFooterControls: false,
     rightFooterControls: false,
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (!Utils.isEqualReact(nextProps, this.props) ||
+            !Utils.isEqualReact(nextState, this.state));
   }
 
   render() {
