@@ -164,10 +164,21 @@
       background: @background-primary;
       z-index: 2;
     }
-    .event-grid-bg {
+    .event-grid-bg-wrap {
+      .event-grid-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .cursor {
+        background: rgba(0,0,0,0.05);
+        position: absolute;
+      }
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 0;
     }
 

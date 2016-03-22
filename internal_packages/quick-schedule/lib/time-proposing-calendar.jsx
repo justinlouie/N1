@@ -73,17 +73,17 @@ export default class TimeProposingCalendar extends React.Component {
     }
   }
 
-  _onMouseUp(event, time) {
+  _onMouseUp({time}) {
     if (!time) { return }
     ScheduleActions.paintTime(time)
   }
 
-  _onMouseMove(event, time) {
-    if (!time) { return }
+  _onMouseMove({time, mouseIsDown}) {
+    if (!time || !mouseIsDown) { return }
     ScheduleActions.paintTime(time)
   }
 
-  _onMouseDown(event, time) {
+  _onMouseDown({time}) {
     if (!time) { return }
     ScheduleActions.paintTime(time)
   }
