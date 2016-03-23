@@ -1,9 +1,7 @@
-/** @babel */
-
 import CalendarButton from './calendar-button'
-import ProposedTimeEvent from './propsed-time-event'
+import ProposedTimeEvent from './proposed-time-event'
 import ProposedTimeStore from './proposed-time-store'
-import TimeProposingCalendar from './time-proposing-calendar'
+import ProposedTimePicker from './proposed-time-picker'
 import {ComponentRegistry, WorkspaceStore} from 'nylas-exports'
 
 export function activate() {
@@ -17,7 +15,7 @@ export function activate() {
     ComponentRegistry.register(ProposedTimeEvent,
       {role: 'Calendar:Event:Right'});
 
-    ComponentRegistry.register(TimeProposingCalendar,
+    ComponentRegistry.register(ProposedTimePicker,
       {location: WorkspaceStore.Location.Center})
   } else {
     ComponentRegistry.register(CalendarButton,
@@ -32,7 +30,7 @@ export function deactivate() {
   ProposedTimeStore.deactivate()
 
   if (NylasEnv.getWindowType() === 'calendar') {
-    ComponentRegistry.unregister(TimeProposingCalendar);
+    ComponentRegistry.unregister(ProposedTimePicker);
   } else {
     ComponentRegistry.unregister(CalendarButton);
   }

@@ -1,12 +1,16 @@
-/** @babel */
 import _ from 'underscore'
 import NylasStore from 'nylas-store'
 import moment from 'moment'
 import ScheduleActions from './schedule-actions'
 import {Event, Message, Actions, NylasAPI, DatabaseStore} from 'nylas-exports'
-import {PLUGIN_ID, PLUGIN_NAME} from './quick-schedule-constants'
+import {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  CALENDAR_ID} from './quick-schedule-constants'
 
+// moment-round upon require patches `moment` with new functions.
 require('moment-round')
+
 /**
  * Maintains the creation of "Proposed Times" when scheduling with people.
  *
@@ -14,10 +18,7 @@ require('moment-round')
  *
  */
 class ProposedTimeStore extends NylasStore {
-  CALENDAR_ID() { return "QUICK_SCHEDULE" }
-
-  Durations() {
-    return [
+  DURATIONS = [
       [15, 'minutes', '15 min'],
       [30, 'minutes', '30 min'],
       [50, 'minutes', '50 min'],
@@ -27,15 +28,14 @@ class ProposedTimeStore extends NylasStore {
       [2.5, 'hours', '2½ hr'],
       [3, 'hours', '3 hr'],
     ]
-  }
 
   activate() {
-    this._paintTimes = []
+    this._proposedTimes = []
     this._choicesPending = false;
     // this.triggerLater = _.throttle(this.trigger, 32)
-    this._duration = this.Durations()[3] // 1 hr
+    this._duration = this.DURATIONS[3] // 1 hr
     this.unsubscribers = [
-      ScheduleActions.paintTime.listen(this._onPaintTime),
+      ScheduleActions.addProposedTime.listen(this._onPaintTime),
       ScheduleActions.removeProposal.listen(this._onRemoveProposal),
       ScheduleActions.changeDuration.listen(this._onChangeDuration),
       ScheduleActions.confirmChoices.listen(this._onConfirmChoices),
@@ -55,7 +55,7 @@ class ProposedTimeStore extends NylasStore {
   }
 
   timeBlocks() {
-    return _.groupBy(this._paintTimes, (t) => {
+    return _.groupBy(this._proposedTimes, (t) => {
       const blockSize = this._duration.slice(0, 2)
       return moment(t).floor(blockSize[0], blockSize[1]).valueOf()
     })
@@ -66,7 +66,7 @@ class ProposedTimeStore extends NylasStore {
     return _.map(this.timeBlocks(), (data, start) => {
       return new Event().fromJSON({
         title: "Proposed Time",
-        calendar_id: this.CALENDAR_ID(),
+        calendar_id: CALENDAR_ID,
         when: {
           object: "timespan",
           start_time: moment(+start).unix(),
@@ -81,7 +81,7 @@ class ProposedTimeStore extends NylasStore {
    * event grid. This gets called on every mouse move and mouseup.
    */
   _onPaintTime = (newMoment) => {
-    this._paintTimes.push(newMoment);
+    this._proposedTimes.push(newMoment);
     this.trigger()
   }
 
@@ -94,7 +94,7 @@ class ProposedTimeStore extends NylasStore {
 
   }
 
-  _metadatFromChoices() {
+  _metadataFromChoices() {
     return this.timeBlocksAsEvents().map((e) => e.toJSON())
   }
 
@@ -110,7 +110,7 @@ class ProposedTimeStore extends NylasStore {
     DatabaseStore.find(Message, draftClientId).then((draft) => {
       NylasAPI.authPlugin(PLUGIN_ID, PLUGIN_NAME, draft.accountId)
       .then(() => {
-        Actions.setMetadata(draft, PLUGIN_ID, this._metadatFromChoices())
+        Actions.setMetadata(draft, PLUGIN_ID, this._metadataFromChoices())
       }).catch((error) => {
         NylasEnv.reportError(error);
         NylasEnv.showErrorDialog(`Sorry, we were unable to schedule this message. ${error.message}`);

@@ -1,11 +1,10 @@
-/** @babel */
-import Reflux from 'reflux';
+import {Reflux} from 'nylas-exports'
 
 const ScheduleActions = Reflux.createActions([
-  'paintTime',
   'confirmChoices',
   'changeDuration',
   'removeProposal',
+  'addProposedTime',
 ])
 
 for (const key in ScheduleActions) {

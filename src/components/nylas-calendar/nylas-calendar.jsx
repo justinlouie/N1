@@ -17,10 +17,34 @@ export default class NylasCalendar extends React.Component {
   static displayName = "NylasCalendar";
 
   static propTypes = {
-    headerControls: React.PropTypes.func,
-    footerControls: React.PropTypes.func,
-    interactionHandlers: React.PropTypes.func,
-    additionalDataSource: React.PropTypes.func,
+    /**
+     * A function that is passed the `currentView`, the `selectedMoment`,
+     * and should return components to render in the header.
+     */
+    headerComponentFactory: React.PropTypes.func,
+
+    /**
+     * A function that is passed the `currentView`, the `selectedMoment`,
+     * and should return components to render in the footer.
+     */
+    footerComponentFactory: React.PropTypes.func,
+
+    /**
+     * A function that is passed the `currentView`, the `selectedMoment`,
+     * and should return a CalendarDataSource
+     */
+    dataSourceGenerator: React.PropTypes.func,
+
+    /**
+     * The following are a set of supported interaction handlers.
+     *
+     * These are passed a custom set of arguments in a single object that
+     * includes the `currentView` as well as things like the `time` at the
+     * click coordinate.
+     */
+    onCalendarMouseDown: React.PropTypes.func,
+    onCalendarMouseMove: React.PropTypes.func,
+    onCalendarMouseUp: React.PropTypes.func,
   }
 
   constructor(props) {
@@ -31,11 +55,11 @@ export default class NylasCalendar extends React.Component {
     };
   }
 
-  _viewComponent(VIEW) {
+  _getCurrentViewComponent() {
     const components = {}
     components[NylasCalendar.WEEK_VIEW] = WeekView
     components[NylasCalendar.MONTH_VIEW] = MonthView
-    return components[VIEW]
+    return components[this.state.currentView]
   }
 
   _changeCurrentView = (currentView) => {
@@ -46,11 +70,23 @@ export default class NylasCalendar extends React.Component {
     this.setState({selectedMoment: newMoment})
   }
 
+  _headerComponentsForCurrentView() {
+
+  }
+
+  _footerComponentsForCurrentView() {
+
+  }
+
+  _dataSourceForCurrentView() {
+
+  }
+
   _pluginProps() {
     const pluginProps = {}
     const pluginPropNames = [
-      "headerControls",
-      "footerControls",
+      "headerComponents",
+      "footerComponents",
       "interactionHandlers",
       "additionalDataSource",
     ]
@@ -76,14 +112,19 @@ export default class NylasCalendar extends React.Component {
   }
 
   render() {
-    const CurrentView = this._viewComponent(this.state.currentView);
+    const CurrentView = this._getCurrentViewComponent();
     return (
       <div className="nylas-calendar">
         <CurrentView
           selectedMoment={this.state.selectedMoment}
           changeCurrentView={this._changeCurrentView}
           changeSelectedMoment={this._changeSelectedMoment}
-          {...this._pluginProps()} />
+          headerComponents={this._headerComponentsForCurrentView()}
+          footerComponents={this._footerComponentsForCurrentView()}
+          dataSource={this._dataSourceForCurrentView()}
+          onCalendarMouseDown={this.props.onCalendarMouseDown}
+          onCalendarMouseMove={this.props.onCalendarMouseMove}
+          onCalendarMouseUp={this.props.onCalendarMouseUp} />
       </div>
     )
   }

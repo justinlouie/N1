@@ -12,7 +12,7 @@ export default class ProposedTimeEvent extends React.Component {
   }
 
   _onClick() {
-    console.log("ON CLICK")
+    // TODO
   }
 
   render() {

@@ -5,8 +5,11 @@ import {NylasCalendar} from 'nylas-component-kit'
 import ScheduleActions from './schedule-actions'
 import ProposedTimeStore from './proposed-time-store'
 
-export default class TimeProposingCalendar extends React.Component {
-  static displayName = "TimeProposingCalendar";
+/**
+ * A an extended NylasCalendar that lets you pick proposed times.
+ */
+export default class ProposedTimePicker extends React.Component {
+  static displayName = "ProposedTimePicker";
 
   constructor(props) {
     super(props);
@@ -30,7 +33,11 @@ export default class TimeProposingCalendar extends React.Component {
     this._usub()
   }
 
-  _footerControls = ({currentView}) => {
+  _dataSourceGenerator({currentView}) {
+    return Rx.Observable.fromStore(ProposedTimeStore).map((store) => store.timeBlocksAsEvents())
+  }
+
+  _footerComponentFactory = ({currentView}) => {
     if (currentView !== NylasCalendar.WEEK_VIEW) { return null }
     return {
       left: this._leftFooterControls(),
@@ -39,7 +46,7 @@ export default class TimeProposingCalendar extends React.Component {
   }
 
   _leftFooterControls() {
-    const optComponents = ProposedTimeStore.Durations().map((opt, i) => {
+    const optComponents = ProposedTimeStore.DURATIONS.map((opt, i) => {
       return <option value={opt.join("|")} key={i}>{opt[2]}</option>
     })
 
@@ -52,14 +59,6 @@ export default class TimeProposingCalendar extends React.Component {
     );
   }
 
-  _onChangeDuration = (event) => {
-    ScheduleActions.changeDuration(event.target.value.split(","))
-  }
-
-  _onDone = () => {
-    ScheduleActions.confirmChoices()
-  }
-
   _rightFooterControls() {
     return (
       <button className="btn btn-emphasis" onClick={this._onDone}>
@@ -68,32 +67,27 @@ export default class TimeProposingCalendar extends React.Component {
     );
   }
 
-  _interactionHandlers = ({currentView}) => {
-    if (currentView !== NylasCalendar.WEEK_VIEW) { return null }
-    return {
-      onMouseDown: this._onMouseDown,
-      onMouseMove: this._onMouseMove,
-      onMouseUp: this._onMouseUp,
-    }
+  _onChangeDuration = (event) => {
+    ScheduleActions.changeDuration(event.target.value.split(","))
   }
 
-  _onMouseUp({time}) {
-    if (!time) { return }
-    ScheduleActions.paintTime(time)
+  _onDone = () => {
+    ScheduleActions.confirmChoices()
   }
 
-  _onMouseMove({time, mouseIsDown}) {
-    if (!time || !mouseIsDown) { return }
-    ScheduleActions.paintTime(time)
+  _onCalendarMouseUp({time, currentView}) {
+    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return null }
+    ScheduleActions.addProposedTime(time)
   }
 
-  _onMouseDown({time}) {
-    if (!time) { return }
-    ScheduleActions.paintTime(time)
+  _onCalendarMouseMove({time, mouseIsDown, currentView}) {
+    if (!time || !mouseIsDown || currentView !== NylasCalendar.WEEK_VIEW) { return null }
+    ScheduleActions.addProposedTime(time)
   }
 
-  _additionalDataSource() {
-    return Rx.Observable.fromStore(ProposedTimeStore).map((store) => store.timeBlocksAsEvents())
+  _onCalendarMouseDown({time, currentView}) {
+    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return null }
+    ScheduleActions.addProposedTime(time)
   }
 
   static containerStyles = {
@@ -102,9 +96,12 @@ export default class TimeProposingCalendar extends React.Component {
 
   render() {
     return (
-      <NylasCalendar footerControls={this._footerControls}
-                     interactionHandlers={this._interactionHandlers}
-                     additionalDataSource={this._additionalDataSource} />
+      <NylasCalendar onCalendarMouseUp={this._onMouseUp}
+                     onCalendarMouseDown={this._onMouseDown}
+                     onCalendarMouseMove={this._onMouseMove}
+                     dataSourceGenerator={this._dataSourceGenerator}
+                     footerComponentFactory={this._footerComponentFactory}
+                     />
     )
   }
 }
