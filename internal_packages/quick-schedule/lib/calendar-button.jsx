@@ -4,17 +4,18 @@ import {RetinaImg} from 'nylas-component-kit'
 export default class CalendarButton extends React.Component {
   static displayName = 'CalendarButton';
 
-  _onClick = () => {
-    NylasEnv.newWindow(
-      {title: "Calendar",
-       windowType: "calendar",
-       windowProps: {}}
-    )
+  static propTypes = {
+    draftClientId: React.PropTypes.string.isRequired,
   }
 
-
-  _getDialog() {
-    require('remote').require('dialog')
+  _onClick = () => {
+    NylasEnv.newWindow({
+      title: "Calendar",
+      windowType: "calendar",
+      windowProps: {
+        draftClientId: this.props.draftClientId,
+      },
+    });
   }
 
   render() {

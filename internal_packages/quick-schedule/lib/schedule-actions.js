@@ -3,6 +3,7 @@ import Reflux from 'reflux';
 
 const ScheduleActions = Reflux.createActions([
   'paintTime',
+  'confirmChoices',
   'changeDuration',
   'removeProposal',
 ])

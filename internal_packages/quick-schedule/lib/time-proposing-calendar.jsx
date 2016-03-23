@@ -56,6 +56,10 @@ export default class TimeProposingCalendar extends React.Component {
     ScheduleActions.changeDuration(event.target.value.split(","))
   }
 
+  _onDone = () => {
+    ScheduleActions.confirmChoices()
+  }
+
   _rightFooterControls() {
     return (
       <button className="btn btn-emphasis" onClick={this._onDone}>

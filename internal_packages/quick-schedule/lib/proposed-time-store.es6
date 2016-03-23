@@ -3,7 +3,8 @@ import _ from 'underscore'
 import NylasStore from 'nylas-store'
 import moment from 'moment'
 import ScheduleActions from './schedule-actions'
-import {Event} from 'nylas-exports'
+import {Event, Message, Actions, NylasAPI, DatabaseStore} from 'nylas-exports'
+import {PLUGIN_ID, PLUGIN_NAME} from './quick-schedule-constants'
 
 require('moment-round')
 /**
@@ -30,13 +31,19 @@ class ProposedTimeStore extends NylasStore {
 
   activate() {
     this._paintTimes = []
+    this._choicesPending = false;
     // this.triggerLater = _.throttle(this.trigger, 32)
     this._duration = this.Durations()[3] // 1 hr
     this.unsubscribers = [
       ScheduleActions.paintTime.listen(this._onPaintTime),
       ScheduleActions.removeProposal.listen(this._onRemoveProposal),
       ScheduleActions.changeDuration.listen(this._onChangeDuration),
+      ScheduleActions.confirmChoices.listen(this._onConfirmChoices),
     ]
+  }
+
+  choicesPending() {
+    return this._choicesPending
   }
 
   deactivate() {
@@ -86,5 +93,30 @@ class ProposedTimeStore extends NylasStore {
   _onRemoveProposal = () => {
 
   }
+
+  _metadatFromChoices() {
+    return this.timeBlocksAsEvents().map((e) => e.toJSON())
+  }
+
+  /**
+   * This will bundle up and attach the choices as metadata on the draft.
+   */
+  _onConfirmChoices = () => {
+    this._choicesPending = true;
+    this.trigger();
+
+    const {draftClientId} = NylasEnv.getWindowProps()
+
+    DatabaseStore.find(Message, draftClientId).then((draft) => {
+      NylasAPI.authPlugin(PLUGIN_ID, PLUGIN_NAME, draft.accountId)
+      .then(() => {
+        Actions.setMetadata(draft, PLUGIN_ID, this._metadatFromChoices())
+      }).catch((error) => {
+        NylasEnv.reportError(error);
+        NylasEnv.showErrorDialog(`Sorry, we were unable to schedule this message. ${error.message}`);
+      });
+    });
+  }
 }
+
 export default new ProposedTimeStore()
