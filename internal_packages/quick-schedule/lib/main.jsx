@@ -19,6 +19,7 @@ export function activate() {
 
     ComponentRegistry.register(TimeProposingCalendar,
       {location: WorkspaceStore.Location.Center})
+  } else if (NylasEnv.getWindowType() === 'composer') {
   } else {
     ComponentRegistry.register(CalendarButton,
       {role: 'Composer:ActionButton'});
