@@ -78,7 +78,7 @@ class Application
 
     if not @config.get('core.disabledPackagesInitialized')
       exampleNewNames = {
-        'N1-Quick-Schedule': 'quick-schedule',
+        'N1-Scheduler': 'N1-Scheduler',
         'N1-Composer-Templates': 'composer-templates',
         'N1-Composer-Translate': 'composer-translate',
         'N1-Message-View-on-Github':'message-view-on-github',
