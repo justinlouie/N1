@@ -1,8 +1,8 @@
 import React from 'react'
 import {Utils} from 'nylas-exports'
 
-export default class EventGridBg extends React.Component {
-  static displayName = "EventGridBg";
+export default class EventGridBackground extends React.Component {
+  static displayName = "EventGridBackground";
 
   static propTypes = {
     height: React.PropTypes.number,
@@ -17,7 +17,7 @@ export default class EventGridBg extends React.Component {
   }
 
   componentDidMount() {
-    this._renderEventGridBg()
+    this._renderEventGridBackground()
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -26,10 +26,10 @@ export default class EventGridBg extends React.Component {
   }
 
   componentDidUpdate() {
-    this._renderEventGridBg()
+    this._renderEventGridBackground()
   }
 
-  _renderEventGridBg() {
+  _renderEventGridBackground() {
     const canvas = React.findDOMNode(this.refs.canvas);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -39,7 +39,7 @@ export default class EventGridBg extends React.Component {
     const doStroke = (type, strokeStyle) => {
       ctx.strokeStyle = strokeStyle;
       ctx.beginPath();
-      for (const {yPos} of this.props.tickGenerator({type: type})) {
+      for (const {yPos} of this.props.tickGenerator({type})) {
         ctx.moveTo(0, yPos);
         ctx.lineTo(canvas.width, yPos);
       }
@@ -80,8 +80,7 @@ export default class EventGridBg extends React.Component {
     return (
       <div className="event-grid-bg-wrap">
         <div ref="cursor" className="cursor"></div>
-        <canvas ref="canvas"
-                className="event-grid-bg" style={styles}></canvas>
+        <canvas ref="canvas" className="event-grid-bg" style={styles}></canvas>
       </div>
     )
   }

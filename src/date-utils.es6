@@ -82,14 +82,6 @@ const DateUtils = {
   // Localized format: MMM D, h:mmA
   DATE_FORMAT_SHORT: moment.localeData().longDateFormat('lll').replace(yearRegex, ''),
 
-  *byDay(startMoment, endMoment) {
-    const curDay = startMoment;
-    while (curDay.isBefore(endMoment)) {
-      yield curDay
-      curDay.add(1, "day")
-    }
-  },
-
   format(momentDate, formatString) {
     if (!momentDate) return null;
     return momentDate.format(formatString);
