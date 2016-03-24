@@ -32,9 +32,8 @@ export function serialize() {
 }
 
 export function deactivate() {
-  ProposedTimeStore.deactivate()
-
   if (NylasEnv.getWindowType() === 'calendar') {
+    ProposedTimeStore.deactivate()
     ComponentRegistry.unregister(ProposedTimeEvent);
     ComponentRegistry.unregister(ProposedTimePicker);
   } else {
