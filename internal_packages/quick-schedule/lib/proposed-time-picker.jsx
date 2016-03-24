@@ -1,4 +1,3 @@
-import Rx from 'rx-lite'
 import React from 'react'
 import {Utils} from 'nylas-exports'
 import {NylasCalendar} from 'nylas-component-kit'
@@ -102,9 +101,9 @@ export default class ProposedTimePicker extends React.Component {
       <NylasCalendar
         dataSource={this._dataSource()}
         footerComponents={this._footerComponents}
-        onCalendarMouseUp={this._onMouseUp}
-        onCalendarMouseDown={this._onMouseDown}
-        onCalendarMouseMove={this._onMouseMove}
+        onCalendarMouseUp={this._onCalendarMouseUp}
+        onCalendarMouseDown={this._onCalendarMouseDown}
+        onCalendarMouseMove={this._onCalendarMouseMove}
       />
     )
   }

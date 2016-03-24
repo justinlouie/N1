@@ -27,10 +27,6 @@ const overlapsBounds = Utils.overlapsBounds;
 export default class WeekView extends React.Component {
   static displayName = "WeekView";
 
-  // TODO currentMoment
-  // TODO interactionHandlers
-  // TODO additionalDataSource
-  // TODO additionalData
   static propTypes = {
     dataSource: React.PropTypes.instanceOf(CalendarDataSource).isRequired,
     currentMoment: React.PropTypes.instanceOf(moment).isRequired,
@@ -110,44 +106,6 @@ export default class WeekView extends React.Component {
       .subtract(1, 'millisecond')
     return end
   }
-
-  // _calEventSubscription(props) {
-  //   this.props.dataSource({}).subscribe(this._onEventsChange)
-  //
-  //   const end = Event.attributes.end
-  //   const start = Event.attributes.start
-  //   const weekStart = this._calculateStartMoment(props).unix()
-  //   const weekEnd = this._calculateEndMoment(props).unix()
-  //
-  //   const matcher = new Matcher.Or([
-  //     new Matcher.And([start.lte(weekEnd), end.gte(weekStart)]),
-  //     new Matcher.And([start.lte(weekEnd), start.gte(weekStart)]),
-  //     new Matcher.And([end.gte(weekStart), end.lte(weekEnd)]),
-  //     new Matcher.And([end.gte(weekEnd), start.lte(weekStart)]),
-  //   ]);
-  //
-  //   const query = DatabaseStore.findAll(Event).where(matcher)
-  //   const $sets = [Rx.Observable.fromQuery(query)]
-  //
-  //   if (this.props.additionalDataSource) {
-  //     $sets.push(this.props.additionalDataSource)
-  //   }
-  //
-  //   Rx.Observable.combineLatest($sets).subscribe(this._onEventsChange)
-  // }
-
-  // _onEventsChange = (events = []) => {
-  //   this.setState({events})
-  //   let events = dataSources[0]
-  //   if (events.length === 0) {
-  //     events = this.state.events;
-  //   }
-  //   const additionalData = dataSources[1]
-  //   if (additionalData.length > 0) {
-  //     events = events.concat(additionalData)
-  //   }
-  //   this.setState({events})
-  // }
 
   _renderDateLabel = (day) => {
     const className = classnames({
