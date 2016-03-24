@@ -1,7 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 import NewEventCard from './new-event-card'
 import {DraftStore} from 'nylas-exports';
-import _ from 'underscore'
 
 export default class NewEventCardContainer extends Component {
   static displayName = 'NewEventCardContainer';
@@ -21,52 +20,59 @@ export default class NewEventCardContainer extends Component {
 
   componentDidMount() {
     this._mounted = true;
-    this.handleProps();
+    this._loadDraft(this.props.draftClientId);
 
-    // Add native event listeners to immediately stop
-    const node = React.findDOMNode(this.refs.event_invite_container);
-    node.addEventListener("mousedown", e => e.stopPropagation());
-    node.addEventListener("mouseup", e => e.stopPropagation());
-    node.addEventListener("keydown", e => e.stopPropagation());
+    // TODO FIXME: We need to manually block the keydown event before it
+    // hits the React event system. This is because the DAMN FOCUS
+    // handlers of the composer will catch the tab and mnaully set the
+    // focus elsewhere instead of letting us naturally tab through our
+    // form fields.
+    React.findDOMNode(this).addEventListener("keydown", this._interceptTab);
   }
 
   componentWillReceiveProps(newProps) {
-    this.handleProps(newProps);
+    this._loadDraft(newProps.draftClientId);
   }
 
   componentWillUnmount() {
     this._mounted = false;
     this._unsubscribes.forEach(s => s());
+    React.findDOMNode(this).removeEventListener("keydown", this._interceptTab);
   }
 
-  handleProps(newProps = null) {
-    const props = newProps || this.props;
-    DraftStore.sessionForClientId(props.draftClientId).then(session => {
+  _interceptTab(e) {
+    e.stopPropagation()
+  }
+
+  _loadDraft(draftClientId) {
+    DraftStore.sessionForClientId(draftClientId).then(session => {
       // Only run if things are still relevant: component is mounted
       // and draftClientIds still match
-      const idIsCurrent = newProps ? true : this.props.draftClientId === session.draftClientId;
-      if (this._mounted && idIsCurrent) {
+      if (this._mounted) {
         this._session = session;
-        const unsub = session.listen( () => { this._onDraftChange(); });
+        this._unsubscribes.forEach(s => s());
+        const unsub = session.listen(this._onDraftChange);
         this._unsubscribes.push(unsub);
         this._onDraftChange();
       }
     });
   }
 
-  _onDraftChange() {
+  _onDraftChange = () => {
     const draft = this._session.draft();
     const to = draft.to || [];
     const from = draft.from || [];
     const participants = to.concat(from);
-    draft.events.forEach(event => event.participants = participants);
+    for (const event of draft.events) {
+      event.participants = participants;
+    }
     this.setState({events: [].concat(draft.events || [])});
   }
 
   _onEventChange(change, index) {
     const events = this.state.events;
     const event = events[index].clone();
-    _.extend(event, change);
+    Object.assign({}, event, change);
     events.splice(index, 1, event);
     this._session.changes.add({events});  // triggers draft change
   }
@@ -77,21 +83,23 @@ export default class NewEventCardContainer extends Component {
     this._session.changes.add({events});  // triggers draft change
   }
 
-  _renderEventEditor(event, index) {
+  _renderNewEventCard = (event, index) => {
     return (
       <NewEventCard event={event}
-                   draft={this._session.draft()}
-                   onChange={change => this._onEventChange(change, index)}
-                   onRemove={() => this._onEventRemove(index)}
-                   onParticipantsClick={() => {}} />
-    );  // TODO focus the To: field
+        draft={this._session.draft()}
+        onRemove={() => this._onEventRemove(index)}
+        onChange={(change) => this._onEventChange(change, index)}
+        onParticipantsClick={() => {}}
+      />
+    );
   }
 
   render() {
-    return (<div className="new-event-card-container"
-                 ref="event_invite_container">
-      {this.state.events.map((evt, i) => this._renderEventEditor(evt, i))}
-    </div>)
+    return (
+      <div className="new-event-card-container">
+        {this.state.events.map(this._renderNewEventCard)}
+      </div>
+    )
   }
 }
 
