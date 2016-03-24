@@ -1,12 +1,10 @@
 import _ from 'underscore'
 import NylasStore from 'nylas-store'
 import moment from 'moment'
+import Proposal from './proposal'
 import ScheduleActions from './schedule-actions'
-import {Event, Message, Actions, NylasAPI, DatabaseStore} from 'nylas-exports'
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  CALENDAR_ID} from './scheduler-constants'
+import {Event, Message, Actions, DatabaseStore} from 'nylas-exports'
+import {PLUGIN_ID, CALENDAR_ID} from './scheduler-constants'
 
 // moment-round upon require patches `moment` with new functions.
 require('moment-round')
@@ -31,7 +29,7 @@ class ProposedTimeStore extends NylasStore {
 
   activate() {
     this._proposedTimes = []
-    this._choicesPending = false;
+    this._pendingSave = false;
     // this.triggerLater = _.throttle(this.trigger, 32)
     this._duration = this.DURATIONS[3] // 1 hr
     this.unsubscribers = [
@@ -42,8 +40,8 @@ class ProposedTimeStore extends NylasStore {
     ]
   }
 
-  choicesPending() {
-    return this._choicesPending
+  pendingSave() {
+    return this._pendingSave
   }
 
   deactivate() {
@@ -94,28 +92,33 @@ class ProposedTimeStore extends NylasStore {
 
   }
 
-  _metadataFromChoices() {
-    return this.timeBlocksAsEvents().map((e) => e.toJSON())
+  timeBlocksAsProposals() {
+    return this.timeBlocksAsEvents().map((e) => {
+      return new Proposal({
+        start: e.start,
+        end: e.end,
+      })
+    })
   }
 
   /**
    * This will bundle up and attach the choices as metadata on the draft.
    */
   _onConfirmChoices = () => {
-    this._choicesPending = true;
+    this._pendingSave = true;
     this.trigger();
 
     const {draftClientId} = NylasEnv.getWindowProps()
 
     DatabaseStore.find(Message, draftClientId).then((draft) => {
-      NylasAPI.authPlugin(PLUGIN_ID, PLUGIN_NAME, draft.accountId)
-      .then(() => {
-        Actions.setMetadata(draft, PLUGIN_ID, this._metadataFromChoices())
-      }).catch((error) => {
-        NylasEnv.reportError(error);
-        const msg = `Sorry, we were unable to schedule this message. ${error.message}`
-        NylasEnv.showErrorDialog(msg);
-      });
+      let metadata = draft.metadataForPluginId(PLUGIN_ID);
+      if (!metadata) { metadata = {} }
+      metadata.proposals = this.timeBlocksAsProposals();
+      Actions.setMetadata(draft, PLUGIN_ID, metadata);
+    }).then(() => {
+      // We need to make sure the database has persisted the metadata
+      // before we close.
+      setTimeout(() => { NylasEnv.close() }, 50)
     });
   }
 }

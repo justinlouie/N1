@@ -166,5 +166,41 @@
         background: #CCC;
       }
     }
+
+    .row.proposals {
+      display: block;
+    }
+    .proposals-wrap {
+      margin-top: 10px;
+      display: flex;
+      padding-left: 58px;
+    }
+    .proposal-day {
+      flex: 1;
+      border: 1px solid @border-color-divider;
+      border-radius: @border-radius-base;
+      margin-right: 15px;
+      text-align: center;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    .day-header {
+      padding: 10px;
+      border-bottom: 1px solid @border-color-divider;
+    }
+    .proposal {
+      padding: 10px;
+      border-bottom: 1px solid @border-color-divider;
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    .day-header {
+      text-transform: uppercase;
+      color: @text-color-very-subtle;
+    }
   }
 }

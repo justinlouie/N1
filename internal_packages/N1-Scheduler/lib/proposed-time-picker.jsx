@@ -19,12 +19,16 @@ export default class ProposedTimePicker extends React.Component {
     super(props);
     this.state = {
       duration: ProposedTimeStore.currentDuration(),
+      pendingSave: ProposedTimeStore.pendingSave(),
     }
   }
 
   componentDidMount() {
     this._usub = ProposedTimeStore.listen(() => {
-      this.setState({duration: ProposedTimeStore.currentDuration()});
+      this.setState({
+        duration: ProposedTimeStore.currentDuration(),
+        pendingSave: ProposedTimeStore.pendingSave(),
+      });
     })
   }
 
@@ -64,8 +68,13 @@ export default class ProposedTimePicker extends React.Component {
 
   _rightFooterComponents() {
     return (
-      <button key="done" className="btn btn-emphasis" style={{order: 100}} onClick={this._onDone}>
-      Done
+      <button key="done"
+        style={{order: 100}}
+        onClick={this._onDone}
+        className="btn btn-emphasis"
+        disabled={this.state.pendingSave}
+      >
+        Done
       </button>
     );
   }
