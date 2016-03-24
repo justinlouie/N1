@@ -227,12 +227,12 @@ export default class WeekView extends React.Component {
 
   _headerComponents() {
     const left = (
-      <button className="btn" onClick={this._onClickToday}>
+      <button key="today" className="btn" onClick={this._onClickToday} style={{order: -100}}>
         Today
       </button>
     );
     const right = (
-      <button className="btn">
+      <button key="month" className="btn" style={{order: 100}}>
         <RetinaImg name="ic-calendar-month.png" mode={RetinaImg.Mode.ContentIsMask} />
       </button>
     );

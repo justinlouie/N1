@@ -40,16 +40,6 @@ export default class SchedulerComposerButton extends React.Component {
     });
   }
 
-  _onOpenCalendar = () => {
-    NylasEnv.newWindow({
-      title: "Calendar",
-      windowType: "calendar",
-      windowProps: {
-        draftClientId: this.props.draftClientId,
-      },
-    });
-  }
-
   _onDraftChange() {
     const draft = this._session.draft();
     const events = draft.events;
@@ -59,14 +49,14 @@ export default class SchedulerComposerButton extends React.Component {
     });
     DatabaseStore.findAll(Calendar, {
       accountId: draft.accountId,
-    }).then( (calendars) => {
+    }).then((calendars) => {
       if (this._mounted) {
         this.setState({calendars: calendars && calendars.filter(c => !c.readOnly)})
       }
     });
   }
 
-  _onClick() {
+  _onClick = () => {
     const events = [].concat(this._session.draft().events);
     if (events.length === 0) {  // API can only handle one event invite for now
       events.push(new Event());
@@ -76,11 +66,14 @@ export default class SchedulerComposerButton extends React.Component {
   }
 
   render() {
-    return (<button className={`btn btn-toolbar ${this.state.enabled ? "btn-enabled" : ""}`}
-                   onClick={this._onClick.bind(this)}
-                   title="Add an event…">
+    return (
+      <button className={`btn btn-toolbar ${this.state.enabled ? "btn-enabled" : ""}`}
+        onClick={this._onClick}
+        title="Add an event…"
+      >
       <RetinaImg url="nylas://N1-Scheduler/assets/ic-composer-scheduler@2x.png"
-                 mode={RetinaImg.Mode.ContentIsMask} />
+        mode={RetinaImg.Mode.ContentIsMask}
+      />
     </button>)
   }
 }

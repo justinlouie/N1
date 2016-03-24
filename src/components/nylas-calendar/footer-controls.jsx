@@ -23,6 +23,7 @@ export default class FooterControls extends React.Component {
     }
     return (
       <div className="footer-controls">
+        <div className="spacer" style={{order: 0, flex: 1}}>&nbsp;</div>
         {this.props.footerComponents}
       </div>
     )

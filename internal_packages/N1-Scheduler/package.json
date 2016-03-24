@@ -5,8 +5,8 @@
   "main": "./lib/main",
   "version": "0.1.0",
   "appId": {
-    "staging": "sssssssssssssssssssssssss",
-    "production": "ppppppppppppppppppppppppp"
+    "staging": "c5dis00do2vki9ib6hngrjs18",
+    "production": "b8zturjyfg2b568czdcanxm63"
   },
   "engines": {
     "nylas": ">=0.4.0"

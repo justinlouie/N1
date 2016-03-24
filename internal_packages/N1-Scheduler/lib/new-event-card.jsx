@@ -63,11 +63,6 @@ export default class NewEventCard extends React.Component {
   }
 
   _renderExpanded() {
-    let description = this.props.event.description;
-    if (description == null) {
-      description = this.props.draft.body;
-    }
-
     return (
       <span>
         <div className="row description">
@@ -76,7 +71,7 @@ export default class NewEventCard extends React.Component {
           <input type="text"
             name="description"
             placeholder="Add notes"
-            value={description}
+            value={this.props.event.description}
             onChange={ e => this.props.onChange({description: e.target.value}) }
           />
         </div>
@@ -131,6 +126,16 @@ export default class NewEventCard extends React.Component {
     )
   }
 
+  _onProposeTimes = () => {
+    NylasEnv.newWindow({
+      title: "Calendar",
+      windowType: "calendar",
+      windowProps: {
+        draftClientId: this.props.draft.clientId,
+      },
+    });
+  }
+
   render() {
     let title = this.props.event.title;
     if (title == null) {
@@ -167,6 +172,10 @@ export default class NewEventCard extends React.Component {
               {moment().tz(Utils.timeZone).format("z")}
             </span>
           </span>
+        </div>
+
+        <div className="suggest-times">
+          or: <a onClick={this._onProposeTimes}>Suggest several times…</a>
         </div>
 
         {this._renderCalendarPicker()}

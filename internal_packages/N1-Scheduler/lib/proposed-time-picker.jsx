@@ -53,7 +53,7 @@ export default class ProposedTimePicker extends React.Component {
     })
 
     return (
-      <div className="duration-picker" style={{order: -100}}>
+      <div key="dp" className="duration-picker" style={{order: -100}}>
         <label style={{paddingRight: 10}}>Event Duration:</label>
         <select value={this.state.duration.join("|")} onChange={this._onChangeDuration}>
           {optComponents}
@@ -64,7 +64,7 @@ export default class ProposedTimePicker extends React.Component {
 
   _rightFooterComponents() {
     return (
-      <button className="btn btn-emphasis" style={{order: 100}} onClick={this._onDone}>
+      <button key="done" className="btn btn-emphasis" style={{order: 100}} onClick={this._onDone}>
       Done
       </button>
     );
@@ -100,7 +100,7 @@ export default class ProposedTimePicker extends React.Component {
     return (
       <NylasCalendar
         dataSource={this._dataSource()}
-        footerComponents={this._footerComponents}
+        footerComponents={this._footerComponents()}
         onCalendarMouseUp={this._onCalendarMouseUp}
         onCalendarMouseDown={this._onCalendarMouseDown}
         onCalendarMouseMove={this._onCalendarMouseMove}
