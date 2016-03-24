@@ -17,6 +17,7 @@ export default class CalendarDataSource {
 
     const query = DatabaseStore.findAll(Event).where(matcher)
     this.observable = Rx.Observable.fromQuery(query)
+    return this.observable
   }
 
   subscribe(callback) {

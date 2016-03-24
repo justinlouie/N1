@@ -25,19 +25,19 @@ export default class CalendarEventContainer extends React.Component {
     window.removeEventListener("mouseup", this._onWindowMouseUp)
   }
 
-  _onCalendarMouseUp(event) {
+  _onCalendarMouseUp = (event) => {
     this._DOMCache = {};
     this._mouseIsDown = false;
     this._runPropsHandler("onCalendarMouseUp", event)
   }
 
-  _onCalendarMouseDown(event) {
+  _onCalendarMouseDown = (event) => {
     this._DOMCache = {};
     this._mouseIsDown = true;
     this._runPropsHandler("onCalendarMouseDown", event)
   }
 
-  _onCalendarMouseMove(event) {
+  _onCalendarMouseMove = (event) => {
     this._runPropsHandler("onCalendarMouseMove", event)
   }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import ProposedTimeStore from './proposed-time-store'
+import {CALENDAR_ID} from './quick-schedule-constants'
 
 /**
  * Gets rendered in a CalendarEvent
@@ -16,7 +16,7 @@ export default class ProposedTimeEvent extends React.Component {
   }
 
   render() {
-    if (this.props.event.calendarId === ProposedTimeStore.CALENDAR_ID()) {
+    if (this.props.event.calendarId === CALENDAR_ID) {
       return <div className="rm-time" onClick={this._onClick}>&times;</div>
     }
     return false
