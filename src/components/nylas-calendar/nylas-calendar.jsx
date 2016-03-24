@@ -51,6 +51,11 @@ export default class NylasCalendar extends React.Component {
     onCalendarMouseMove: React.PropTypes.func,
   }
 
+  static defaultProps = {
+    headerComponents: {day: false, week: false, month: false, year: false},
+    footerComponents: {day: false, week: false, month: false, year: false},
+  }
+
   static containerStyles = {
     height: "100%",
   }

@@ -100,7 +100,7 @@ export default class ProposedTimePicker extends React.Component {
   render() {
     return (
       <NylasCalendar
-        dataSource={this._dataSource}
+        dataSource={this._dataSource()}
         footerComponents={this._footerComponents}
         onCalendarMouseUp={this._onMouseUp}
         onCalendarMouseDown={this._onMouseDown}

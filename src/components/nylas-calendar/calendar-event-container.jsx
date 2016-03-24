@@ -7,11 +7,9 @@ export default class CalendarEventContainer extends React.Component {
   static displayName = "CalendarEventContainer";
 
   static propTypes = {
-    interactionHandlers: React.PropTypes.objectOf(React.PropTypes.func),
-  }
-
-  static defaultProps = {
-    interactionHandlers: {},
+    onCalendarMouseUp: React.PropTypes.func,
+    onCalendarMouseDown: React.PropTypes.func,
+    onCalendarMouseMove: React.PropTypes.func,
   }
 
   constructor() {
@@ -27,37 +25,31 @@ export default class CalendarEventContainer extends React.Component {
     window.removeEventListener("mouseup", this._onWindowMouseUp)
   }
 
-  _supportedEvents() {
-    return [
-      "onMouseDown",
-      "onMouseMove",
-      "onMouseUp",
-    ]
+  _onCalendarMouseUp(event) {
+    this._DOMCache = {};
+    this._mouseIsDown = false;
+    this._runPropsHandler("onCalendarMouseUp", event)
   }
 
-  _mouseCallbacks() {
-    const mouseCallbacks = {}
-    for (const eventName of this._supportedEvents()) {
-      const pluginFn = this.props.interactionHandlers[eventName]
-      if (pluginFn) {
-        mouseCallbacks[eventName] = (event) => {
-          if (eventName === "onMouseDown") {
-            this._DOMCache = {};
-            this._mouseIsDown = true;
-          } else if (eventName === "onMouseUp") {
-            this._DOMCache = {};
-            this._mouseIsDown = false;
-          }
-          const {time, x, y, width, height} = this._dataFromMouseEvent(event);
-          try {
-            pluginFn({event, time, x, y, width, height, mouseIsDown: this._mouseIsDown})
-          } catch (error) {
-            NylasEnv.reportError(error)
-          }
-        }
-      }
+  _onCalendarMouseDown(event) {
+    this._DOMCache = {};
+    this._mouseIsDown = true;
+    this._runPropsHandler("onCalendarMouseDown", event)
+  }
+
+  _onCalendarMouseMove(event) {
+    this._runPropsHandler("onCalendarMouseMove", event)
+  }
+
+  _runPropsHandler(name, event) {
+    const propsFn = this.props[name]
+    if (!propsFn) { return }
+    const {time, x, y, width, height} = this._dataFromMouseEvent(event);
+    try {
+      propsFn({event, time, x, y, width, height, mouseIsDown: this._mouseIsDown})
+    } catch (error) {
+      NylasEnv.reportError(error)
     }
-    return mouseCallbacks
   }
 
   _dataFromMouseEvent(event) {
@@ -82,7 +74,8 @@ export default class CalendarEventContainer extends React.Component {
     width = gridWrap.scrollWidth;
     height = gridWrap.scrollHeight;
     const percentDay = y / height;
-    time = moment(((+eventColumn.dataset.end) - (+eventColumn.dataset.start)) * percentDay + (+eventColumn.dataset.start));
+    const diff = ((+eventColumn.dataset.end) - (+eventColumn.dataset.start))
+    time = moment(diff * percentDay + (+eventColumn.dataset.start));
     return {x, y, width, height, time}
   }
 
@@ -90,13 +83,16 @@ export default class CalendarEventContainer extends React.Component {
     if (React.findDOMNode(this).contains(event.target)) {
       return
     }
-    const mouseUp = this._mouseCallbacks().onMouseUp
-    if (mouseUp) { mouseUp(event) }
+    this._onCalendarMouseUp(event)
   }
 
   render() {
     return (
-      <div className="calendar-mouse-handler" {...this._mouseCallbacks()}>
+      <div className="calendar-mouse-handler"
+        onMouseUp={this._onCalendarMouseUp}
+        onMouseDown={this._onCalendarMouseDown}
+        onMouseMove={this._onCalendarMouseMove}
+      >
         {this.props.children}
       </div>
     )
