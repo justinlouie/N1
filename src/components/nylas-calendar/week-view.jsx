@@ -7,6 +7,7 @@ import {RetinaImg} from 'nylas-component-kit'
 import {Event, Utils, Matcher, DatabaseStore} from 'nylas-exports'
 
 import TopBanner from './top-banner'
+import {WEEK_VIEW} from './calendar-constants'
 import HeaderControls from './header-controls'
 import FooterControls from './footer-controls'
 import CalendarDataSource from './calendar-data-source'
@@ -28,16 +29,17 @@ const overlapsBounds = Utils.overlapsBounds;
 export default class WeekView extends React.Component {
   static displayName = "WeekView";
 
-  // TODO selectedMoment
+  // TODO currentMoment
   // TODO interactionHandlers
-  // TODO changeSelectedMoment
   // TODO additionalDataSource
   // TODO additionalData
   static propTypes = {
     dataSource: React.PropTypes.instanceOf(CalendarDataSource).isRequired,
+    currentMoment: React.PropTypes.instanceOf(moment).isRequired,
     headerComponents: React.PropTypes.node,
     footerComponents: React.PropTypes.node,
     changeCurrentView: React.PropTypes.func,
+    changeCurrentMoment: React.PropTypes.func,
     onCalendarMouseUp: React.PropTypes.func,
     onCalendarMouseDown: React.PropTypes.func,
     onCalendarMouseMove: React.PropTypes.func,
@@ -53,7 +55,6 @@ export default class WeekView extends React.Component {
     super(props);
     this.state = {
       events: [],
-      additionalData: [],
       intervalHeight: MIN_INTERVAL_HEIGHT,
     }
   }
@@ -88,55 +89,60 @@ export default class WeekView extends React.Component {
     this.todayYear = moment().year()
     this.todayDayOfYear = moment().dayOfYear()
     if (this._sub) { this._sub.dispose() }
-    this._sub = this._calEventSubscription(props);
-    this.setState({
-      endMoment: this._calculateEndMoment(props),
-      startMoment: this._calculateStartMoment(props),
-    })
+    const startMoment = this._calculateStartMoment(props)
+    const endMoment = this._calculateEndMoment(props)
+    this._sub = this.props.dataSource.buildObservable({
+      startTime: startMoment.unix(),
+      endTime: endMoment.unix(),
+    }).subscribe((state) => {this.setState(state)})
+    this.setState({startMoment, endMoment})
   }
 
   _calculateStartMoment(props) {
-    return moment([props.selectedMoment.year()]).weekday(0).week(props.selectedMoment.week()).subtract(BUFFER_DAYS, 'days')
+    return moment([props.currentMoment.year()]).weekday(0).week(props.currentMoment.week()).subtract(BUFFER_DAYS, 'days')
   }
 
   _calculateEndMoment(props) {
     return moment(this._calculateStartMoment(props)).add(BUFFER_DAYS * 2 + DAYS_IN_VIEW, 'days').subtract(1, 'millisecond')
   }
 
-  _calEventSubscription(props) {
-    const end = Event.attributes.end
-    const start = Event.attributes.start
-    const weekStart = this._calculateStartMoment(props).unix()
-    const weekEnd = this._calculateEndMoment(props).unix()
+  // _calEventSubscription(props) {
+  //   this.props.dataSource({}).subscribe(this._onEventsChange)
+  //
+  //   const end = Event.attributes.end
+  //   const start = Event.attributes.start
+  //   const weekStart = this._calculateStartMoment(props).unix()
+  //   const weekEnd = this._calculateEndMoment(props).unix()
+  //
+  //   const matcher = new Matcher.Or([
+  //     new Matcher.And([start.lte(weekEnd), end.gte(weekStart)]),
+  //     new Matcher.And([start.lte(weekEnd), start.gte(weekStart)]),
+  //     new Matcher.And([end.gte(weekStart), end.lte(weekEnd)]),
+  //     new Matcher.And([end.gte(weekEnd), start.lte(weekStart)]),
+  //   ]);
+  //
+  //   const query = DatabaseStore.findAll(Event).where(matcher)
+  //   const $sets = [Rx.Observable.fromQuery(query)]
+  //
+  //   if (this.props.additionalDataSource) {
+  //     $sets.push(this.props.additionalDataSource)
+  //   }
+  //
+  //   Rx.Observable.combineLatest($sets).subscribe(this._onEventsChange)
+  // }
 
-    const matcher = new Matcher.Or([
-      new Matcher.And([start.lte(weekEnd), end.gte(weekStart)]),
-      new Matcher.And([start.lte(weekEnd), start.gte(weekStart)]),
-      new Matcher.And([end.gte(weekStart), end.lte(weekEnd)]),
-      new Matcher.And([end.gte(weekEnd), start.lte(weekStart)]),
-    ]);
-
-    const query = DatabaseStore.findAll(Event).where(matcher)
-    const $sets = [Rx.Observable.fromQuery(query)]
-
-    if (this.props.additionalDataSource) {
-      $sets.push(this.props.additionalDataSource)
-    }
-
-    Rx.Observable.combineLatest($sets).subscribe(this._onEventsChange)
-  }
-
-  _onEventsChange = (dataSources = []) => {
-    let events = dataSources[0]
-    if (events.length === 0) {
-      events = this.state.events;
-    }
-    const additionalData = dataSources[1]
-    if (additionalData.length > 0) {
-      events = events.concat(additionalData)
-    }
-    this.setState({events})
-  }
+  // _onEventsChange = (events = []) => {
+  //   this.setState({events})
+  //   let events = dataSources[0]
+  //   if (events.length === 0) {
+  //     events = this.state.events;
+  //   }
+  //   const additionalData = dataSources[1]
+  //   if (additionalData.length > 0) {
+  //     events = events.concat(additionalData)
+  //   }
+  //   this.setState({events})
+  // }
 
   _renderDateLabel = (day) => {
     const className = classnames({
@@ -271,17 +277,17 @@ export default class WeekView extends React.Component {
   }
 
   _onClickToday = () => {
-    this.props.changeSelectedMoment(moment())
+    this.props.changeCurrentMoment(moment())
   }
 
   _onClickNextWeek = () => {
-    const newMoment = moment(this.props.selectedMoment).add(1, 'week')
-    this.props.changeSelectedMoment(newMoment)
+    const newMoment = moment(this.props.currentMoment).add(1, 'week')
+    this.props.changeCurrentMoment(newMoment)
   }
 
   _onClickPrevWeek = () => {
-    const newMoment = moment(this.props.selectedMoment).subtract(1, 'week')
-    this.props.changeSelectedMoment(newMoment)
+    const newMoment = moment(this.props.currentMoment).subtract(1, 'week')
+    this.props.changeCurrentMoment(newMoment)
   }
 
   _gridHeight() {

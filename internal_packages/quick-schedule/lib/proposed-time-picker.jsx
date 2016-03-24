@@ -4,6 +4,7 @@ import {Utils} from 'nylas-exports'
 import {NylasCalendar} from 'nylas-component-kit'
 import ScheduleActions from './schedule-actions'
 import ProposedTimeStore from './proposed-time-store'
+import ProposedTimeCalendarDataSource from './proposed-time-calendar-data-source'
 
 /**
  * A an extended NylasCalendar that lets you pick proposed times.
@@ -38,8 +39,7 @@ export default class ProposedTimePicker extends React.Component {
   }
 
   _dataSource() {
-    // TODO
-    return Rx.Observable.fromStore(ProposedTimeStore).map((store) => store.timeBlocksAsEvents())
+    return new ProposedTimeCalendarDataSource()
   }
 
   _footerComponents = () => {

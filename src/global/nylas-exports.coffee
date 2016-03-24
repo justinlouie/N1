@@ -61,6 +61,7 @@ class NylasExports
   @load "QueryResultSet", 'flux/models/query-result-set'
   @load "MutableQueryResultSet", 'flux/models/mutable-query-result-set'
   @load "ObservableListDataSource", 'flux/stores/observable-list-data-source'
+  @load "CalendarDataSource", 'components/nylas-calendar/calendar-data-source'
   @load "QuerySubscription", 'flux/models/query-subscription'
   @load "MutableQuerySubscription", 'flux/models/mutable-query-subscription'
   @load "QuerySubscriptionPool", 'flux/models/query-subscription-pool'

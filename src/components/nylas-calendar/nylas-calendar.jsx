@@ -1,17 +1,14 @@
 import React from 'react'
+import moment from 'moment'
 import WeekView from './week-view'
 import MonthView from './month-view'
 import CalendarDataSource from './calendar-data-source'
+import {WEEK_VIEW, MONTH_VIEW} from './calendar-constants'
 
 /**
  * Nylas Calendar
  */
 export default class NylasCalendar extends React.Component {
-  static DAY_VIEW = "day"
-  static WEEK_VIEW = "week"
-  static MONTH_VIEW = "month"
-  static YEAR_VIEW = "year"
-
   static displayName = "NylasCalendar";
 
   static propTypes = {
@@ -61,19 +58,24 @@ export default class NylasCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentView: NylasCalendar.WEEK_VIEW,
+      currentView: WEEK_VIEW,
+      currentMoment: moment(),
     };
   }
 
   _getCurrentViewComponent() {
     const components = {}
-    components[NylasCalendar.WEEK_VIEW] = WeekView
-    components[NylasCalendar.MONTH_VIEW] = MonthView
+    components[WEEK_VIEW] = WeekView
+    components[MONTH_VIEW] = MonthView
     return components[this.state.currentView]
   }
 
   _changeCurrentView = (currentView) => {
     this.setState({currentView});
+  }
+
+  _changeCurrentMoment = (currentMoment) => {
+    this.setState({currentMoment})
   }
 
   render() {
@@ -82,9 +84,11 @@ export default class NylasCalendar extends React.Component {
       <div className="nylas-calendar">
         <CurrentView
           dataSource={this.props.dataSource}
+          currentMoment={this.state.currentMoment}
           headerComponents={this.props.headerComponents[this.state.currentView]}
           footerComponents={this.props.footerComponents[this.state.currentView]}
           changeCurrentView={this._changeCurrentView}
+          changeCurrentMoment={this._changeCurrentMoment}
           onCalendarMouseUp={this.props.onCalendarMouseUp}
           onCalendarMouseDown={this.props.onCalendarMouseDown}
           onCalendarMouseMove={this.props.onCalendarMouseMove}
