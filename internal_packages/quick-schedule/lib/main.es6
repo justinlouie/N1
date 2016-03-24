@@ -13,7 +13,7 @@ export function activate() {
       {popout: ['Center']})
 
     ComponentRegistry.register(ProposedTimeEvent,
-      {role: 'Calendar:Event:Right'});
+      {role: 'Calendar:Event'});
 
     ComponentRegistry.register(ProposedTimePicker,
       {location: WorkspaceStore.Location.Center})
@@ -30,6 +30,7 @@ export function deactivate() {
   ProposedTimeStore.deactivate()
 
   if (NylasEnv.getWindowType() === 'calendar') {
+    ComponentRegistry.unregister(ProposedTimeEvent);
     ComponentRegistry.unregister(ProposedTimePicker);
   } else {
     ComponentRegistry.unregister(CalendarButton);

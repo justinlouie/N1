@@ -11,6 +11,10 @@ import ProposedTimeStore from './proposed-time-store'
 export default class ProposedTimePicker extends React.Component {
   static displayName = "ProposedTimePicker";
 
+  static containerStyles = {
+    height: "100%",
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -33,35 +37,35 @@ export default class ProposedTimePicker extends React.Component {
     this._usub()
   }
 
-  _dataSourceGenerator({currentView}) {
+  _dataSource() {
+    // TODO
     return Rx.Observable.fromStore(ProposedTimeStore).map((store) => store.timeBlocksAsEvents())
   }
 
-  _footerComponentFactory = ({currentView}) => {
-    if (currentView !== NylasCalendar.WEEK_VIEW) { return null }
+  _footerComponents = () => {
     return {
-      left: this._leftFooterControls(),
-      right: this._rightFooterControls(),
+      week: [this._leftFooterComponents(), this._rightFooterComponents()],
     }
   }
 
-  _leftFooterControls() {
+  _leftFooterComponents() {
     const optComponents = ProposedTimeStore.DURATIONS.map((opt, i) => {
       return <option value={opt.join("|")} key={i}>{opt[2]}</option>
     })
 
     return (
-      <div className="duration-picker">
+      <div className="duration-picker" style={{order: -100}}>
         <label style={{paddingRight: 10}}>Event Duration:</label>
-        <select value={this.state.duration.join("|")}
-                onChange={this._onChangeDuration}>{optComponents}</select>
+        <select value={this.state.duration.join("|")} onChange={this._onChangeDuration}>
+          {optComponents}
+        </select>
       </div>
     );
   }
 
-  _rightFooterControls() {
+  _rightFooterComponents() {
     return (
-      <button className="btn btn-emphasis" onClick={this._onDone}>
+      <button className="btn btn-emphasis" style={{order: 100}} onClick={this._onDone}>
       Done
       </button>
     );
@@ -76,32 +80,32 @@ export default class ProposedTimePicker extends React.Component {
   }
 
   _onCalendarMouseUp({time, currentView}) {
-    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return null }
-    ScheduleActions.addProposedTime(time)
+    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return }
+    ScheduleActions.addProposedTime(time);
+    return
   }
 
   _onCalendarMouseMove({time, mouseIsDown, currentView}) {
-    if (!time || !mouseIsDown || currentView !== NylasCalendar.WEEK_VIEW) { return null }
-    ScheduleActions.addProposedTime(time)
+    if (!time || !mouseIsDown || currentView !== NylasCalendar.WEEK_VIEW) { return }
+    ScheduleActions.addProposedTime(time);
+    return
   }
 
   _onCalendarMouseDown({time, currentView}) {
-    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return null }
-    ScheduleActions.addProposedTime(time)
-  }
-
-  static containerStyles = {
-    height: "100%",
+    if (!time || currentView !== NylasCalendar.WEEK_VIEW) { return }
+    ScheduleActions.addProposedTime(time);
+    return
   }
 
   render() {
     return (
-      <NylasCalendar onCalendarMouseUp={this._onMouseUp}
-                     onCalendarMouseDown={this._onMouseDown}
-                     onCalendarMouseMove={this._onMouseMove}
-                     dataSourceGenerator={this._dataSourceGenerator}
-                     footerComponentFactory={this._footerComponentFactory}
-                     />
+      <NylasCalendar
+        dataSource={this._dataSource}
+        footerComponents={this._footerComponents}
+        onCalendarMouseUp={this._onMouseUp}
+        onCalendarMouseDown={this._onMouseDown}
+        onCalendarMouseMove={this._onMouseMove}
+      />
     )
   }
 }

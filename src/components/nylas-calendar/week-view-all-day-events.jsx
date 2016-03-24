@@ -34,10 +34,15 @@ export default class WeekViewAllDayEvents extends React.Component {
           scopeStart={this.props.start}
           scopeEnd={this.props.end}
           direction="horizontal"
-          fixedMinorDimension={this.props.minorDim}
-          concurrentEvents={this.props.allDayOverlap[e.id].concurrentEvents}/>
+          fixedSize={this.props.minorDim}
+          concurrentEvents={this.props.allDayOverlap[e.id].concurrentEvents}
+        />
       );
     });
-    return <div className="all-day-events" style={{height: this.props.height}}>{eventComponents}</div>
+    return (
+      <div className="all-day-events" style={{height: this.props.height}}>
+        {eventComponents}
+      </div>
+    )
   }
 }

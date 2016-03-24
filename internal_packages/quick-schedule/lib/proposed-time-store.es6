@@ -19,15 +19,15 @@ require('moment-round')
  */
 class ProposedTimeStore extends NylasStore {
   DURATIONS = [
-      [15, 'minutes', '15 min'],
-      [30, 'minutes', '30 min'],
-      [50, 'minutes', '50 min'],
-      [1, 'hour', '1 hr'],
-      [1.5, 'hours', '1½ hr'],
-      [2, 'hours', '2 hr'],
-      [2.5, 'hours', '2½ hr'],
-      [3, 'hours', '3 hr'],
-    ]
+    [15, 'minutes', '15 min'],
+    [30, 'minutes', '30 min'],
+    [50, 'minutes', '50 min'],
+    [1, 'hour', '1 hr'],
+    [1.5, 'hours', '1½ hr'],
+    [2, 'hours', '2 hr'],
+    [2.5, 'hours', '2½ hr'],
+    [3, 'hours', '3 hr'],
+  ]
 
   activate() {
     this._proposedTimes = []
@@ -73,7 +73,7 @@ class ProposedTimeStore extends NylasStore {
           end_time: moment(+start).add(blockSize[0], blockSize[1]).subtract(1, 'second').unix(),
         },
       })
-    })
+    });
   }
 
   /**
@@ -113,7 +113,8 @@ class ProposedTimeStore extends NylasStore {
         Actions.setMetadata(draft, PLUGIN_ID, this._metadataFromChoices())
       }).catch((error) => {
         NylasEnv.reportError(error);
-        NylasEnv.showErrorDialog(`Sorry, we were unable to schedule this message. ${error.message}`);
+        const msg = `Sorry, we were unable to schedule this message. ${error.message}`
+        NylasEnv.showErrorDialog(msg);
       });
     });
   }

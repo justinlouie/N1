@@ -7,15 +7,13 @@ export default class HeaderControls extends React.Component {
 
   static propTypes = {
     title: React.PropTypes.string,
-    leftHeaderControls: React.PropTypes.node,
-    rightHeaderControls: React.PropTypes.node,
+    headerComponents: React.PropTypes.node,
     nextAction: React.PropTypes.func,
     prevAction: React.PropTypes.func,
   }
 
   static defaultProps = {
-    leftHeaderControls: false,
-    rightHeaderControls: false,
+    headerComonents: false,
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -28,7 +26,8 @@ export default class HeaderControls extends React.Component {
     return (
       <button className="btn btn-icon next" onClick={this.props.nextAction}>
         <RetinaImg name="ic-calendar-right-arrow.png"
-                   mode={RetinaImg.Mode.ContentIsMask}/>
+          mode={RetinaImg.Mode.ContentIsMask}
+        />
       </button>
     )
   }
@@ -38,7 +37,8 @@ export default class HeaderControls extends React.Component {
     return (
       <button className="btn btn-icon prev" onClick={this.props.prevAction}>
         <RetinaImg name="ic-calendar-left-arrow.png"
-                   mode={RetinaImg.Mode.ContentIsMask}/>
+          mode={RetinaImg.Mode.ContentIsMask}
+        />
       </button>
     )
   }
@@ -46,19 +46,12 @@ export default class HeaderControls extends React.Component {
   render() {
     return (
       <div className="header-controls">
-        <div className="left-controls">
-          {this.props.leftHeaderControls}
-        </div>
-
         <div className="center-controls">
           {this._renderPrevAction()}
           <span className="title">{this.props.title}</span>
           {this._renderNextAction()}
         </div>
-
-        <div className="right-controls">
-          {this.props.rightHeaderControls}
-        </div>
+        {this.props.headerComponents}
       </div>
     )
   }

@@ -3,8 +3,8 @@ import moment from 'moment'
 
 import React from 'react'
 
-export default class CalendarMouseHandler extends React.Component {
-  static displayName = "CalendarMouseHandler";
+export default class CalendarEventContainer extends React.Component {
+  static displayName = "CalendarEventContainer";
 
   static propTypes = {
     interactionHandlers: React.PropTypes.objectOf(React.PropTypes.func),
@@ -20,16 +20,10 @@ export default class CalendarMouseHandler extends React.Component {
   }
 
   componentDidMount() {
-    this._DOMCache = {};
     window.addEventListener("mouseup", this._onWindowMouseUp)
   }
 
-  componentDidUpdate() {
-    this._DOMCache = {};
-  }
-
   componentWillUnmount() {
-    this._DOMCache = {};
     window.removeEventListener("mouseup", this._onWindowMouseUp)
   }
 
